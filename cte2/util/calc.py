@@ -41,8 +41,9 @@ def calc_from_config(config):
         return calc_from_py(config)
 
 
-def single_point_calculate(atoms, calc):
-    atoms.calc = calc
+def single_point_calculate(atoms, calc=None):
+    if calc is not None:
+        atoms.calc = calc
     energy = atoms.get_potential_energy()
     forces = atoms.get_forces()
     stress = atoms.get_stress()

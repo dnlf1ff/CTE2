@@ -18,8 +18,8 @@ def process_phonon(config, desc='initiating phonopy with primitive matrix'):
     suffix_list = _get_suffix_list(e_min, e_max, delta=delta, Nsteps=Nsteps)
 
     for idx, suffix in enumerate(tqdm(suffix_list), desc=desc)):
-        prefix = f"{config['phonon']['save']}/e-{suffix}"
-        os.makedirs(prefix, exist_ok = True)
+        phonon_dir = f"{config['phonon']['save']}/e-{suffix}"
+        os.makedirs(phonon_dir, exist_ok = True)
         atoms = read(f"{config['deform']['save']}/e-{suffix}/CONTCAR", format='vasp')
         unitcell = aseatoms2phonoatoms(atoms)
 
@@ -48,6 +48,6 @@ def process_phonon(config, desc='initiating phonopy with primitive matrix'):
             for j, sc in enumerate(phonon.supercells_with_displacements):
                 label = str(j+1).zfill(3)
                 atoms= Atoms(sc.symbols, cell=sc.cell, positions=sc.positions, pbc=True)
-                write(f"{prefix}/fc2-{labe}/POSCAR", atoms, format='vasp')
+                write(f"{phonon_dir}/fc2-{labe}/POSCAR", atoms, format='vasp')
 
-        phonon.save(f"{prefix}/phonopy_disp.yaml")
+        phonon.save(f"{phonon_dir}/phonopy_disp.yaml")

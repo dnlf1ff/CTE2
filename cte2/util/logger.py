@@ -1,5 +1,6 @@
 import os, sys
 import time
+import datetime
 from datetime import timedelta
 from cte2.cui.cte2_script import _print_cte2, print_time, _print_end, _print_qha
 from typing import Any, Dict, List, Optional
@@ -10,6 +11,16 @@ DEFORM_LOG_KEYS = ['Index', 'Strain','SPG_num', 'Conv','Length', 'Angle', 'Energ
 PHONON_LOG_KEYS = ['Index', 'PM', 'FC2', 'Mesh', 'Im']
 COLUMN_PADDING = 2
 
+def print_time():
+    """Print current time."""
+    print(
+        "-------------------------"
+        f"[time {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}]"
+        "-------------------------"
+        )
+
+def _print_end():
+    print("...finished running cte2!")
 
 class Singleton(type):
     _instances = {}

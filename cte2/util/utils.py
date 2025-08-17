@@ -169,3 +169,4 @@ def _get_ratio_list(e_min, e_max, Nsteps=None, delta=None):
     ratio_list = [1+strain for strain in strain_list]
     return ratio_list
 
+

@@ -1,9 +1,7 @@
 from __future__ import annotations
 import warnings
-from ase.io import write
 from phonopy import load
-from phonopy.file_IO import parse_FORCE_CONSTANTS
-import numpy as np
+import phonopy.file_IO import as ph_IO
 import os
 from tqdm import tqdm
 
@@ -24,12 +22,11 @@ def process_harmonic(config):
         IM = False
         h_dir = f"{config['harmonic']['save']}/e-{suffix}"
 
-
-        if os.path.isfile(f"{h_dir}/phonopy.yaml"):
-            phonon = load(f"{h_dir}/phonopy.yaml")
+        if os.path.isfile(f"{h_dir}/phonopy_params.yaml"):
+            phonon = load(f"{h_dir}/phonopy_params.yaml")
         else:
-            phonon = load(f"{h_dir}/phonopy.yaml.xz")
-            phonon.force_constants = parse_FORCE_CONSTANTS(f"{h_dir}/FORCE_CONSTANTS_2ND")
+            phonon = load(f"{h_dir}/phonopy_params.yaml.xz")
+            phonon.force_constants = ph_IO.parse_FORCE_CONSTANTS(f"{h_dir}/FORCE_CONSTANTS_2ND")
 
         mesh_numbers = config['harmonic']['mesh_numbers'] 
 
@@ -48,9 +45,8 @@ def process_harmonic(config):
         sm_round = [int(x) for x in config['phonon']['supercell']]
         num_disp = int(len(phonon.supercells_with_displacements))
 
-        phonon_recorder{
-                'Index': idx, 'PM': pm_round, 'FC2':f'{sm_round}*{num_disp}', 'Mesh': mesh_numbers, 'Im': IM
-                }
+        phonon_recorder{'Index': idx, 'PM': pm_round, 'FC2':f'{sm_round}*{num_disp}',
+                    'Mesh': mesh_numbers, 'Im': IM}
         logger.phonon_recorder.update(phonon_recorder, idx=idx)
 
         if IM:
@@ -58,6 +54,7 @@ def process_harmonic(config):
 
         try:
             read_thermal_properties(filenames=[f"{h_dir}/thermal_properties.yaml"])
+
         except Exception as e:
             print(f"Error while reading thermal properties yaml file at e-{suffix} structure")
             print(f"Will calculate thermal properties again")
@@ -78,14 +75,15 @@ def process_harmonic(config):
             band_plt.close()
 
         if config['harmonic']['dos']:
-            phonon.auto_total_dos(mesh=mesh_numbers, is_time_reversal=True, is_mesh_symmetry=True, is_gamma_center=False, with_tight_frequency_range=False, write_dat=True, filename=f'{h_dir}/total_dos.dat')
+            dos_args = {'mesh': mesh_numbers, 'is_time_reversal': True, 'is_mesh_symmetry': True,
+                        'is_gamma_center': False, 'with_tight_requency_range': False, 'write_dat': True}
+            phonon.auto_total_dos(filename=f'{h_dir}/total_dos.dat', **dos_args)
             dos_plt = phonon.plot_total_dos()
             dos_plt.savefig(f'{h_dir}/total_dos.png', dpi=300)
             dos_plt.close()
             band_dos_plt = phonon.plot_band_structure_and_dos()
             band_dos_plt.savefig(f'{h_dir}/band_dos.png', dpi=300)
             band_dos_plt.close()
-
             phonon.save(f'{h_dir}/phonopy.yaml', compression=True)
 
         if config['harmonic']['pdos']:

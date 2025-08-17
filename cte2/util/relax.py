@@ -19,7 +19,7 @@ class AseAtomRelax:
         optimizer,
         cell_filter=None,
         mask=None,
-        fix_atoms=False,
+        fix_atom=False,
         fix_symm=False,
         fmax=0.00001,
         steps=1000,
@@ -29,18 +29,18 @@ class AseAtomRelax:
         self.optimizer = optimizer
         self.cell_filter = cell_filter
         self.mask = mask
-        self.fix_atoms = fix_atoms
+        self.fix_atom = fix_atom
         self.fix_symm = fix_symm
         self.fmax = fmax
         self.steps = steps
         self.logfile = logfile
 
-    def _get_atoms0(self, atoms_0):
+    def _get_atoms(self, atoms_0):
         atoms = atoms_0.copy()
         if self.fix_symm:
             atoms.set_constraint(FixSymmetry(atoms, symprec=1e-5))
 
-        if self.fix_atoms:
+        if self.fix_atom:
             z =atoms.positions[:,2].copy()
             indices = [atom.index for atom in atoms if atom.position[2] < np.percentile(z,62) and atom.position[2]>np.percentile(z,38)]
             atoms.set_constraint(FixAtoms(indices=indices))
@@ -48,7 +48,7 @@ class AseAtomRelax:
         return atoms
 
     def update_atoms(self, atoms_0):
-        atoms = self._get_atoms0(atoms_0)
+        atoms = self._get_atoms(atoms_0)
         atoms.calc = self.calc
 
         try:
@@ -61,19 +61,10 @@ class AseAtomRelax:
         atoms.info['conv'] = conv
         atoms.info['stress'] = atoms.get_stress()
         atoms.info['stress_voigt'] = atoms.get_stress(voigt=True)
-        atoms.info['volume'] = atoms.get_volume()
-        # atoms.info['cell'] = atoms.cell.array
-        atoms.info['a'] = atoms.cell.lengths()[0]
-        atoms.info['b'] = atoms.cell.lengths()[1]
-        atoms.info['c'] = atoms.cell.lengths()[2]
-        atoms.info['alpha'] = atoms.cell.angles()[0]
-        atoms.info['beta'] = atoms.cell.angles()[1]
-        atoms.info['gamma'] = atoms.cell.angles()[2]
-        # atoms.info['surface_area'] = np.linalg.norm(np.cross(atoms.cell[0], atoms.cell[1]))
         return atoms
 
     def relax_atoms(self, atoms_0):
-        atoms = self._get_atoms0(atoms_0)
+        atoms = self._get_atoms(atoms_0)
         atoms.calc = self.calc
 
         if self.cell_filter is not None:
@@ -92,17 +83,14 @@ def aar_from_config(config, calc, opt='bulk', logfile=None):
 
     try:
         opt = OPT_DICT[arr_args['optimizer'].lower()]
-
     except Exception as e:
         print(f'error {e} occured while finding optimizer')
         opt = OPT_DICT['fire']
         print(f'will use ase.optimize.FIRE')
 
-    cell_filter = arr_args.get('cell_filter', None)
 
     try:
-        cell_filter = FILTER_DICT[cell_filter.lower()]
-        
+        cell_filter = FILTER_DICT[aar_args.get('cell_filter', None)]
     except Exception as e:
         cell_filter = None
 

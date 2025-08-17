@@ -71,9 +71,9 @@ def process_deform(config, calc):
         scale_poscar(config)
 
     for idx, (suffix, strain) in enumerate(tqdm(zip(suffix_list, strain_list), desc=desc)):
-        prefix = f"{config['deform']['save']}/e-{suffix}"
+        deform_dir = f"{config['deform']['save']}/e-{suffix}"
 
-        atoms = read(f"{prefix}/POSCAR")
+        atoms = read(f"{deform_dir}/POSCAR")
         atoms.info['init_spg_num'] = init_spg = get_spgnum(atoms)
         init_vol = atoms.get_volume()
         atoms = ase_atom_relaxer.update_atoms_info(atoms)
@@ -85,14 +85,14 @@ def process_deform(config, calc):
             spg_num = atoms.info['spg_num'] = get_spgnum(atoms)
 
         else:
-            atoms = read(f"{prefix}/CONTCAR")
+            atoms = read(f"{deform_dir}/CONTCAR")
             atoms = ase_atom_relaxer.update_atoms_info(atoms)
             spg_num = get_spgnum(atoms)
 
         volume = atoms.get_volume()
 
         write_csv(csv_file, atoms, idx=f'post-e-{strain}')
-        write(f"{prefix}/CONTCAR", atoms, format='vasp')
+        write(f"{deform_dir}/CONTCAR", atoms, format='vasp')
 
         if not (init_spg == spg_num):
             warnings.warn(
