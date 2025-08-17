@@ -3,7 +3,6 @@ prefix: .
 
 data:
     input: ./input/POSCAR-unitcell
-    reference: '/data2/jinvk/DATA/PHONONDB'
     load_args:
         format: vasp
         index: 0 

@@ -5,7 +5,9 @@ import seekpath
 from ase.io import write
 
 from ase import Atoms
+from ase.cell import Cell
 from pymatgen.io.vasp import Vasprun
+from pymatgen.core import Structure, Lattice
 
 import spglib
 from phonopy import Phonopy

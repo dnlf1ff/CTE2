@@ -1,9 +1,6 @@
-import os, sys
-import time
-import datetime
+import os, sys, time, datetime
 from datetime import timedelta
-from cte2.cui.cte2_script import _print_cte2, print_time, _print_end, _print_qha
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 import numpy as np
 
 UNITCELL_LOG_KEYS = ['Formula','SPG_num', 'Conv','Length', 'Angle','Natom']
@@ -31,16 +28,30 @@ class Singleton(type):
         return cls._instances[cls]
 
 class Recorder:
-    def __init__(self, keys, num=None):
+    def __init__(self, keys: List[str], num: Union[int, float]):
+        """ Initialize a recorder for logging results.
+        Args:
+            keys (list[str]): List of keys to be recorded.
+            num (Optional[int]): Number of records to initialize. If None, a single record is created. use for strained structions
+
+        Attributes:
+            keys (list[str]): List of keys to be recorded.
+            result_dicts (dict or list[dict]): Dictionary or list of dictionaries to store results. 
+
+        Returns:
+            None
+        """
+
         self.keys = keys
         result_dict = {k: '-' for k in keys}
         result_dicts = result_dict.copy()
+
         if num is not None:
             self.result_dicts = [result_dicts.copy() for _ in range(num)]
         else:
             self.result_dicts = result_dicts.copy()
 
-    def update(self, dct, idx=None):
+    def update(self, dct, idx: Optional[int, float]=None):
         np.set_printoptions(formatter={'float':'{: 0.2f}'.format})
         if idx is not None:
             for key in self.keys:
@@ -57,7 +68,7 @@ class Recorder:
         np.set_printoptions()
 
 class Logger(metaclass=Singleton):
-    def __init__(self, num=11, filename=None):
+    def __init__(self, num: Optional[int, float] = 11, filename: Union[str, os.PathLike] = 'cte2.log'):
         self.filename = filename
         self.init_time = time.time()
         self.num = num
@@ -80,13 +91,12 @@ class Logger(metaclass=Singleton):
 
     def greet(self):
         self.writeline()
-        _print_cte2()
         self.writeline()
         self.log_bar()
 
-    def log_config(self, config: Dict[str, Any]):
+    def log_config(self, config):
         print_time()
-        key_list = ['calculator', 'data', 'unitcell', 'deform', 'phonon', 'harmonic']
+        key_list = ['calculator', 'data', 'unitcell', 'deform', 'phonon', 'harmonic', 'qha']
         max_len = max([len(k) for k in key_list])
         self.writeline()
         self.writeline('Configuration for running cte2')

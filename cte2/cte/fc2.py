@@ -1,27 +1,31 @@
 import numpy as np
 import gc, sys, os, torch
 from tqdm import tqdm
-from ase.io import read
+from ase import Atoms
+import ase.io as ase_IO
 
 from cte2.util.utils import _get_suffix_list
 
 from phonopy import file_IO as ph_IO
 from phonopy import load
+from phonopy.api_phonopy import Phonopy
 
 from cte2.util.logger import Logger
-from cte2.mlip.calc import single_point_calculate
+from cte2.util.calc import single_point_calculate
 
-def calculate_fc2(phonon, phonon_dir, calc=None, symm_fc2=True):
+from typing import Optional, Union, Any
+
+def calculate_fc2(phonon: Phonopy, phonon_dir: Union[str, os.PathLike], calc: Optional[Any]=None, symm_fc2: Union[bool, int]=True):
     forces = []
     for idx, sc in enumerate(phonon.supercells_with_displacements):
         label = str(idx+1).zfill(3)
         if calc is not None:
-            atoms = read(f"{phonon_dir}/fc2-{label}", format='vasp')
-            atoms = single_point_calculate(atoms, calc, desc=desc)
-            write(f"{phonon_dir}/fc2-{label}/CONTCAR", atoms, format='vasp')
+            atoms = ase_IO.read(f"{phonon_dir}/fc2-{label}", format='vasp')
+            atoms = single_point_calculate(atoms, calc)
+            ase_IO.write(f"{phonon_dir}/fc2-{label}/CONTCAR", atoms, format='vasp')
 
         else:
-            atoms = read(f"{phonon_dir}/fc2-{label}/OUTCAR")
+            atoms = ase_IO.read(f"{phonon_dir}/fc2-{label}/OUTCAR")
         forces.append(atoms.get_forces())
 
     force_set = np.array(forces)
@@ -44,7 +48,7 @@ def process_fc2(config, calc=None):
     suffix_range = _get_suffix_list(**strain_args)
 
 
-    for idx, suffix in enumerate(tqdm(suffix_range), desc='processing fc2')):
+    for idx, suffix in enumerate(tqdm(suffix_range, desc='processing fc2')):
         phonon_dir = f"{config['phonon']['save']}/e-{suffix}"
         fc2_dir = f"{config['harmonic']['save']}/e-{suffix}"
         os.makedirs(fc2_dir, exist_ok = True)

@@ -1,6 +1,6 @@
 import os
-from cte2.calc.parse_calc_config import check_calc_config
-from cte2.util.parse_args import args_parser
+from cte2.util.parse_calc_config import check_calc_config
+from cte2.util.argparser import parse_args
 
 class Essential:
     pass
@@ -14,26 +14,38 @@ DEFAULT_OPT_ARGS = {
     'fix_symm': True,
     'fix_atom': False,
     'logfile': 'relax.log',
-}
+    }
+
+DEFAULT_CALC_CONFIG = {
+    'calc_type': None,
+    'functional': None,
+    'potential_dirname': Essential(),
+    'dispersion': None,
+    'model': None,
+    'modal': None,
+    'calc_args': {'device': None},
+    }
+
 
 DEFAULT_DATA_CONFIG = {
     'input': Essential(),
     'load_args': {'index': ':'},
-}
+    }
 
 
 DEFAULT_UNITCELL_CONFIG = {
     'run': True,
     'load': None,
+    'write': None,
     'save': None,
-    'opt': Essential()
-}
+    'opt': Essential(),
+    }
 
 
 DEFAULT_DEFORM_CONFIG = {
     'save': None,
-    'write': 'e-v.csv', 
-    'opt': Essential()
+    'write': None,
+    'opt': Essential(),
     'run': True,
     'load': None,
     'load_opt': None,
@@ -41,18 +53,18 @@ DEFAULT_DEFORM_CONFIG = {
     'Nsteps': None,
     'e_min': None,
     'e_max': None,
-}
+    }
 
 DEFAULT_PHONON_CONFIG = {
     'load': None,
     'save': None,
-    'primitive': [1, 1, 1],
+    'primitive': [1,1,1],
     'symprec': None,
     'supercell': [3,3,3], 
-    'symmtrize': True,
-    'distance': None
+    'symmetrize': True,
+    'distance': None,
     'random_seed': None
-}
+    }
 
 
 DEFAULT_HARMONIC_CONFIG = {
@@ -61,23 +73,24 @@ DEFAULT_HARMONIC_CONFIG = {
     'mesh': True,
     'mesh_numbers': [19,19,19],
     'dos': True,
-    'band': True
+    'band': True,
     'symprec': 1e-05,
     't_min': None,
     't_max': None,
     't_step': None,
-}
+    }
 
 
 DEFAULT_QHA_CONFIG = {
     'save': None,
+    'write': None,
     't_max': None,
     'sparse': None,
     'data': None,
     'plot': None,
     'full': None,
     'eos': 'birch-murnahghan',
-}
+    }
 
 def overwrite_default(config, argv: list[str] | None=None):
     args = parse_args(argv)
@@ -101,7 +114,7 @@ def update_default_config(config):
         'unitcell': DEFAULT_UNITCELL_CONFIG,
         'deform': DEFAULT_DEFORM_CONFIG,
         'phonon': DEFAULT_PHONON_CONFIG,
-        'harmonic': DEFAULT_THERMAL_CONFIG,
+        'harmonic': DEFAULT_HARMONIC_CONFIG,
         'qha': DEFAULT_QHA_CONFIG,
     }
 
@@ -203,17 +216,15 @@ def update_config_dirs(config):
     return config
 
 def parse_config(config, argv: list[str] | None=None):
-    config = overwrite_default(config, argv)
     config = update_default_config(config)
+    config = overwrite_default(config, argv)
     config = update_config_dirs(config)
 
     check_data_config(config)
-    check_relax_config(config)
-    check_opt_config(config)
+    check_unitcell_config(config)
     check_deform_config(config)
-    check_thermal_config(config)
-    check_fc2_config(config)
     check_phonon_config(config)
+    check_harmonic_config(config)
     check_qha_config(config)
 
     config = check_calc_config(config)

@@ -2,7 +2,9 @@ from cte2.util.logger import Logger
 from cte2.vasp.preprocess import process_input, process_deform, process_phonon
 from cte2.util.argparser import parse_args
 from cte2.util.config import parse_config
+from cte2.util.io import dumpYAML
 
+import yaml, warnings
 
 def main(argv: list[str] | None=None) -> None:
     warnings.filterwarnings("ignore", category=DeprecationWarning, module="seekpath.hpkot")
@@ -16,7 +18,7 @@ def main(argv: list[str] | None=None) -> None:
     config = parse_config(config, argv)
     dumpYAML(config, f'{config["cwd"]}/config.yaml')
 
-    logger = Logger(f"{config['output']}/{prefix}_cte2.log")
+    logger = Logger(num = config['deform']['Nsteps'], filename=f"{config['cwd']}/cte2.log")
     logger.greet()
 
     logger.writeline('Reading config successful!')

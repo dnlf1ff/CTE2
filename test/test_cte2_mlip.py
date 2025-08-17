@@ -1,11 +1,12 @@
 import sys, yaml, gc
-from cte2.mlip.calc import calc_from_config
+from cte2.test.util.test_calc import calc_from_config
 
-from cte2.util.argparser import parse_args
-from cte2.util.config import parse_config
+from cte2.util.test_argparser import parse_args
+from cte2.test.util.test_config import parse_config
 from cte2.util.logger import Logger
 
 from cte2.mlip.preprocess as process_input, process_deform
+from cte2.mlip.postprocess as process_phonon
 
 import torch
 import warnings
@@ -35,7 +36,9 @@ def main(argv: list[str] | None=None) -> None:
 
     process_deform(config, calc)
     logger.log_deform()
-    logger.save(deform=True, filename=f"{config['deform']['save']}/deform.csv")
+
+    process_phonon(config)
+    logger.log_phonon()
 
 
 if __name__ == '__main__':

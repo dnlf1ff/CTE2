@@ -78,19 +78,20 @@ class AseAtomRelax:
         conv = optimizer.run(fmax=self.fmax, steps=self.steps)
         return atoms
 
-def aar_from_config(config, calc, opt='bulk', logfile=None):
-    arr_args = config['opt'][opt].copy()
+def aar_from_config(config, calc, opt_type, logfile=None):
+    arr_args = config['opt'][opt_type].copy()
 
     try:
         opt = OPT_DICT[arr_args['optimizer'].lower()]
+
     except Exception as e:
         print(f'error {e} occured while finding optimizer')
         opt = OPT_DICT['fire']
         print(f'will use ase.optimize.FIRE')
 
-
     try:
-        cell_filter = FILTER_DICT[aar_args.get('cell_filter', None)]
+        cell_filter = FILTER_DICT[arr_args.get('cell_filter', None)]
+
     except Exception as e:
         cell_filter = None
 

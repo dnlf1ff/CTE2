@@ -1,11 +1,16 @@
-from ase.io import read, write
+import ase.io  as ase_IO
+from ase import Atoms
+from ase.cell import Cell
+
 from tqdm import tqdm
-import os, shutil
+import os, shutil, gc, warnings
 
 from pymatgen.io.vasp import Vasprun
+from cte2.util.logger import Logger
+from cte2.util.utils import _get_suffix_list, write_csv, get_spgnum
 
-from hotpy.util.logger import Logger
-from hotpy.util.utils import _get_suffix_list, write_csv, get_spgnum
+
+from typing import Dict, Any
 
 def post_unitcell(config):
     logger = Logger()
@@ -16,9 +21,9 @@ def post_unitcell(config):
     write_csv(csv_file, vrun, idx='pre')
     write_csv(csv_file, vrun, idx='post')
 
-    atoms = read(f"{config['unitcell']['save']/POSCAR")
+    atoms = ase_IO.read(f"{config['unitcell']['save']}/POSCAR", format='vasp')
     init_spg = get_spgnum(atoms)
-    outcar = read(f"{config['unitcell']['save']/OUTCAR")
+    outcar = ase_IO.read(f"{config['unitcell']['save']}/OUTCAR")
     spg_num = get_spgnum(outcar)
 
     spg_same = (spg_num == init_spg)
@@ -29,7 +34,7 @@ def post_unitcell(config):
             + f'{init_spg} > {spg_num}'
             )
     if not vrun.converged:
-        step = config['unitcell']['incar']
+        incar = config['unitcell']['incar']
         warnings.warn(
                 f'unitcell structure {atoms} did not converged with in incar: {incar}'
             )
@@ -63,10 +68,10 @@ def post_deform(config):
         write_csv(csv_file, vrun, idx='pre')
         write_csv(csv_file, vrun, idx='post')
 
-        atoms = read(f"{deform_dir}/POSCAR")
+        atoms = ase_IO.read(f"{deform_dir}/POSCAR", format='vasp')
         init_spg = get_spgnum(atoms)
         init_vol = atoms.get_volume()
-        outcar = read(f"{deform_dir}/OUTCAR")
+        outcar = ase_IO.read(f"{deform_dir}/OUTCAR")
         spg_num = get_spgnum(outcar)
         volume = outcar.get_volume()
 
@@ -83,7 +88,7 @@ def post_deform(config):
                 )
 
         if not vrun.converged:
-            step = config['deform']['incar']
+            incar = config['deform']['incar']
             warnings.warn(
                     f'unitcell structure {atoms} did not converged with in incar: {incar}'
                 )
@@ -92,10 +97,10 @@ def post_deform(config):
                                'Angle': outcar.cell.angles(), 'Length': outcar.cell.lengths(),
                                'Energy': outcar.get_potential_energy(force_consistent=True), 'Volume': volume}
 
-            logger.deform_recorder.update(dct = unitcell_recorder, idx=idx)
+            logger.deform_recorder.update(dct = deform_recorder, idx=idx)
 
+        del atoms, vrun, outcar
+        gc.collect()
     csv_file.close()
-    del atoms, vrun, outcar, csv_file
-    gc.collect()
 
 

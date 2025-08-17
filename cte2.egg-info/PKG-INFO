@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: cte2
+Version: 0.2.0
+Summary: python package for calculating  the coefficient of thermal expansion with universal machine learning interatomic potentials
+Author-email: Yujin Kang <jinvk.to@gmail.com>
+Project-URL: Homepage, https://github.com/dnlf1ff/cte2
+Project-URL: Issues, https://github.com/dnlf1ff/cte2/issues
+Requires-Python: >=2.7
+Description-Content-Type: text/markdown
+Requires-Dist: sevenn
+Requires-Dist: numpy

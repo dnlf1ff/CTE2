@@ -1,7 +1,8 @@
 from __future__ import annotations
 import warnings
 from phonopy import load
-import phonopy.file_IO import as ph_IO
+from phonopy.api_phonopy import Phonopy
+import phonopy.file_IO as ph_IO
 import os
 from tqdm import tqdm
 
@@ -18,20 +19,23 @@ def process_harmonic(config):
 
     suffix_range = _get_suffix_list(**strain_args)
 
-    for idx, suffix in in enumerate(tqdm(suffix_range, desc='calculating harmonic properties')):
+    for idx, suffix in enumerate(tqdm(suffix_range, desc='calculating harmonic properties')):
         IM = False
         h_dir = f"{config['harmonic']['save']}/e-{suffix}"
 
         if os.path.isfile(f"{h_dir}/phonopy_params.yaml"):
             phonon = load(f"{h_dir}/phonopy_params.yaml")
+
         else:
             phonon = load(f"{h_dir}/phonopy_params.yaml.xz")
-            phonon.force_constants = ph_IO.parse_FORCE_CONSTANTS(f"{h_dir}/FORCE_CONSTANTS_2ND")
 
+        phonon.force_constants = ph_IO.parse_FORCE_CONSTANTS(f"{h_dir}/FORCE_CONSTANTS_2ND")
         mesh_numbers = config['harmonic']['mesh_numbers'] 
 
-        phonon.run_mesh(mesh_numbers, is_mesh_symmetry=True, with_eigenvectors=False, with_group_velocities=True, is_gamma_center=False)
-        # with_eigen_vectors; disable mesh_sym
+        mesh_args = {'is_time_reversal': True, 'is_mesh_symmetry': True,
+                        'is_gamma_center': False, 'with_eigenvectors': False,
+                        'with_group_velocities': True} # with_eigen_vectors; disable mesh_sym
+        phonon.run_mesh(mesh_numbers, **mesh_args)
 
         phonon.mesh.write_yaml(filename=f'{h_dir}/mesh.yaml')
         frequencies = phonon.get_mesh_dict()['frequencies']
@@ -39,13 +43,14 @@ def process_harmonic(config):
             with open(f'{h_dir}/ERROR-IMAGINARY.txt', 'w') as f:
                 f.write('Imaginary mode detected during mesh calculation suffix {suffix}..\n')
                 f.close()
+            warnings.warn(f'Imaginary mode detected during mesh calculation suffix {suffix}..')
             IM = True
         
         pm_round = [[round(x, 2) for x in param] for param in config['phonon']['primitive']]
         sm_round = [int(x) for x in config['phonon']['supercell']]
         num_disp = int(len(phonon.supercells_with_displacements))
 
-        phonon_recorder{'Index': idx, 'PM': pm_round, 'FC2':f'{sm_round}*{num_disp}',
+        phonon_recorder = {'Index': idx, 'PM': pm_round, 'FC2':f'{sm_round}*{num_disp}',
                     'Mesh': mesh_numbers, 'Im': IM}
         logger.phonon_recorder.update(phonon_recorder, idx=idx)
 
@@ -53,10 +58,10 @@ def process_harmonic(config):
             continue
 
         try:
-            read_thermal_properties(filenames=[f"{h_dir}/thermal_properties.yaml"])
+            ph_IO.read_thermal_properties_yaml(filenames=[f"{h_dir}/thermal_properties.yaml"])
 
         except Exception as e:
-            print(f"Error while reading thermal properties yaml file at e-{suffix} structure")
+            print(f"Error {e} while reading thermal properties yaml file at e-{suffix} structure")
             print(f"Will calculate thermal properties again")
 
             phonon.run_thermal_properties(t_min = config['harmonic']['t_min'],
@@ -96,5 +101,3 @@ def process_harmonic(config):
             band_pdos_plt.close()
 
 
-if __name__ == '__main__':
-    main()

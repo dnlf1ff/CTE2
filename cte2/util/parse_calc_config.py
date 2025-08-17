@@ -30,7 +30,7 @@ def check_calc_config(config):
             config['calculator']['calc_args']['modal'] = None
 
     elif conf['calc_type'].lower() == 'dpa':
-        from hotpy.mlip.loader import DPA_MODELS, DPA_MODALS 
+        from cte2.util.calc_loader import DPA_MODELS, DPA_MODALS 
         model = model.lower()
         assert model in DPA_MODELS.keys(),f'unknown DPA model {model}'
         model = DPA_MODELS[model]
@@ -40,7 +40,7 @@ def check_calc_config(config):
         config['calculator']['calc_args']['modal'] = DPA_MODALS[modal]
 
     elif conf['calc_type'].lower() == 'esen':
-        from hotpy.mlip.loader import ESEN_MODELS
+        from cte2.util.calc_loader import ESEN_MODELS
         model = model.lower()
         assert model in ESEN_MODELS.keys(), f'unknown eSEN model {model}'
         model = ESEN_MODELS[model]
@@ -48,7 +48,7 @@ def check_calc_config(config):
         config['calculator']['calc_args']['model'] = potential
  
     elif conf['calc_type'].lower() == 'orb':
-        from hotpy.mlip.loader import ORB_MODELS
+        from cte2.util.calc_loader import ORB_MODELS
         model = model.lower()
         assert model in ORB_MODELS.keys(),f'unknown ORB model {model}'
         model = ORB_MODELS[model]
@@ -56,7 +56,7 @@ def check_calc_config(config):
         config['calculator']['calc_args']['model'] = model
 
     elif conf['calc_type'].lower() == 'uma':
-        from hotpy.mlip.loader import UMA_MODELS, UMA_MODALS, UMA_FUNCTIONALS
+        from cte2.util.calc_loader import UMA_MODELS, UMA_MODALS, UMA_FUNCTIONALS
         model = model.lower()
         if model.endswith('pt'):
             assert model.lower() in UMA_MODELS.values(), f'unknown UMA model {model}'

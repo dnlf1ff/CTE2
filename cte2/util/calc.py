@@ -11,10 +11,10 @@ def calc_from_py(config):
     import importlib.util
     from pathlib import Path
 
-    file_path = Path(__file__).resolve().parent
-    spec = importlib.util.spec_from_file_location(f'load_calc', f'{file_path}/loader.py')
+    file_path = Path(__file__).resolve()
+    spec = importlib.util.spec_from_file_location(f'load_calc', f'{file_path}/calc_loader.py')
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    spec.calc_loader.exec_module(module)
 
     calc = module.load_calc(config)
     return calc

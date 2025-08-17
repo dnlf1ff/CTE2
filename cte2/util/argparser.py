@@ -11,13 +11,14 @@ def base_parser(argv: list[str] | None=None):
  
     parser.add_argument('--prefix', '--prefix', dest='cwd', type=str, default='vasp', help='working directory')
 
+    parser.add_argument('--potcar_dirname', default='.', type=str, help='dir for potcar files')
+
     parser.add_argument('--functional', type=str, default='PBE54', help='VASP pseudo-potential functional')
 
     return parser.parse_args(argv)
 
 def vasp_parser(argv: list[str] | None=None):
     parser = argparse.ArgumentParser(description = "cli tool for VASP")
-    parser.add_argument('--potcar_dirname', default='.', type=str, help='dir for potcar files')
 
     parser.add_argument('--task', default='unitcell', type=str, help='task to run')
 
@@ -28,9 +29,6 @@ def mlip_parser(argv: list[str] | None=None):
     parser = argparse.ArgumentParser(description = "cli tool for U-MLIP")
  
     parser.add_argument('--model', dest='model', type=str, default='.',
-                        help='absolute directory of the U-MLIP potential')
-
-    parser.add_argument('--model_dirname','--model_path','--path','--dirname', dest='dirname',type=str, default='.',
                         help='absolute directory of the U-MLIP potential')
 
     parser.add_argument('--modal','--task', '--head','--task_name', dest='modal', type=str, 

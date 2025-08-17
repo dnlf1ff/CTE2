@@ -1,26 +1,28 @@
 from cte2.util.logger import Logger
-from cte2.util.utils import _get_suffix_list
+from cte2.util.utils import _get_suffix_list, aseatoms2phonoatoms
 
 from phonopy.api_phonopy import Phonopy
 
 import numpy as np
 from tqdm import tqdm
 import warnings
-from ase.io import read, write
-import torch, gc
-import os
+import ase.io as ase_IO
+from ase import Atoms
+import torch, gc, os, sys
 
-def process_phonon(config, desc='initiating phonopy with primitive matrix'):
+def process_phonon(config):
+    desc='initiating phonopy with primitive matrix')
     logger = Logger()
 
     delta, Nsteps = config['deform']['delta'], config['deform']['Nsteps']
     e_min, e_max = config['deform']['e_min'], config['deform']['e_max']
     suffix_list = _get_suffix_list(e_min, e_max, delta=delta, Nsteps=Nsteps)
 
-    for idx, suffix in enumerate(tqdm(suffix_list), desc=desc)):
+    for idx, suffix in enumerate(tqdm(suffix_list, desc=desc)):
         phonon_dir = f"{config['phonon']['save']}/e-{suffix}"
+        deform_dir = f"{config['deform']['save']}/e-{suffix}"
         os.makedirs(phonon_dir, exist_ok = True)
-        atoms = read(f"{config['deform']['save']}/e-{suffix}/CONTCAR", format='vasp')
+        atoms = ase_IO.read(f"{deform_dir}/CONTCAR", format='vasp')
         unitcell = aseatoms2phonoatoms(atoms)
 
         try:
@@ -48,6 +50,6 @@ def process_phonon(config, desc='initiating phonopy with primitive matrix'):
             for j, sc in enumerate(phonon.supercells_with_displacements):
                 label = str(j+1).zfill(3)
                 atoms= Atoms(sc.symbols, cell=sc.cell, positions=sc.positions, pbc=True)
-                write(f"{phonon_dir}/fc2-{labe}/POSCAR", atoms, format='vasp')
+                ase_IO.write(f"{phonon_dir}/fc2-{label}/POSCAR", atoms, format='vasp')
 
         phonon.save(f"{phonon_dir}/phonopy_disp.yaml")
