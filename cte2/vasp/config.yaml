@@ -1,0 +1,128 @@
+---
+prefix: .
+
+data:
+    input: ./input/POSCAR-unitcell
+    load_args:
+        format: vasp
+        index: 0 
+
+calculator:
+    calc_type: vasp
+    functional: PBE54 
+
+unitcell:
+    save: ./vc-relax/unitcell
+    incar:
+        PREC: Accurate
+        IBRION: 2
+        NSW: 20
+        NELMIN: 5
+        ISIF: 3
+        ENCUT: 520 # 500 for metals
+        EDIFF: 1E-08
+        EDIFFG: -1E-08
+        ISMEAR: 0 # 1 for metals
+        SIGMA: 1E-02
+        ALGO: Normal
+        LREAL: false
+        ADDGRID: true
+        LWAVE: false
+        LCHARG: false
+        NPAR: 4
+
+    kpoints:
+        comment: 'Kpoints for unitcell relaxation'
+        nkpoints: 0
+        generation_style: Monkhorst
+        grid: [3,3,3]
+        kpoints: [3,3,3]
+        usershift: [0,0,0]
+
+deform:
+    save: ./relax/deformed
+    write: 'e-v.csv'
+    delta: 0.01
+    Nsteps: 11
+    e_max: 0.05
+    e_min: -0.05
+    incar:
+        PREC: Accurate
+        IBRION: 2
+        NSW: 20
+        NELMIN: 5
+        ISIF: 2
+        ENCUT: 520 # 500 for metals
+        EDIFF: 1E-08
+        EDIFFG: -1E-08
+        ISMEAR: 0 # 1 for metals
+        SIGMA: 1E-02
+        ALGO: Normal
+        LREAL: false
+        ADDGRID: true
+        LWAVE: false
+        LCHARG: false
+        NPAR: 4
+
+    kpoints:
+        comment: 'Kpoints for unitcell relaxation'
+        nkpoints: 0
+        generation_style: Monkhorst
+        kpoints: [3,3,3]
+        usershift: [0,0,0]
+
+
+phonon:
+    save: ./static/phonon_supercell
+    # load: ./static
+    cutoff: 1.0e-07
+    symprec: 1.0e-05
+    primitive: [[1,0,0], [0,1,0], [0,0,1]]
+    random_seed: 42
+    supercell: [3,3,3]
+    symmetrize: true
+    distance: 0.01
+    incar:
+        PREC: Accurate
+        IBRION: -1
+        NELMIN: 5
+        ISIF: 2
+        ENCUT: 520 # 500 for metals
+        EDIFF: 1E-08
+        ISMEAR: 0 # 1 for metals
+        SIGMA: 1E-02
+        ALGO: Normal
+        LREAL: false
+        ADDGRID: true
+        LWAVE: false
+        LCHARG: false
+        NPAR: 4
+
+    kpoints:
+        comment: 'Kpoints for unitcell relaxation'
+        nkpoints: 0
+        generation_style: Monkhorst
+        kpoints: [3,3,3]
+        usershift: [0,0,0]
+
+harmonic:
+    save: ./harmonic
+    fc2: true
+    mesh: true
+    mesh_numbers: [19, 19, 19]
+    band: true
+    dos: true
+    thermal: true
+    t_step: 2
+    t_min: 0
+    t_max: 801
+
+qha:
+    save: ./qha
+    run: true
+    eos: birch_murnaghan
+    sparse: 50
+    t_max: 800
+    data: ./data
+    plot: ./plot
+    full: ./full

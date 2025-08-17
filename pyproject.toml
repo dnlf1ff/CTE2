@@ -1,0 +1,43 @@
+[build-system]
+requires = [
+    "setuptools",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "cte2"
+version = "0.2.0"
+authors = [
+  { name = "Yujin Kang", email = "jinvk.to@gmail.com" },
+  ]
+description = "python package for calculating  the coefficient of thermal expansion with universal machine learning interatomic potentials"
+readme = "README.md"
+requires-python = ">=2.7"
+
+
+[project.scripts]
+cte2 = "cte2.scripts.cte2_cte:main"
+cte2-cte = "cte2.scripts.cte2_cte:main"
+
+cte2-vasp = "cte2.scripts.cte2_vasp:main"
+cte2-mlip = "cte2.scripts.cte2_mlip:main"
+
+cte2-fc2 = "cte2.scripts.cte2_fc2:main"
+cte2-harmonic = "cte2.scripts.cte2_harmonic:main"
+cte2-qha = "cte2.scripts.cte2_qha:main"
+
+[tool.setuptools]
+packages = [
+    "cte2",
+    "cte2.cte",
+    "cte2.scripts",
+    "cte2.mlip",
+    "cte2.vasp",
+    "cte2.util",
+]
+
+[project.urls]
+Homepage = "https://github.com/dnlf1ff/cte2"
+Issues = "https://github.com/dnlf1ff/cte2/issues"
