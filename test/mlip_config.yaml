@@ -1,0 +1,114 @@
+---
+prefix: .
+
+data:
+    input: ./input/POSCAR-unitcell
+    reference: '/data2/jinvk/DATA/PHONONDB'
+    load_args:
+        format: vasp
+        index: 0 
+
+calculator:
+    calc_type: sevennet
+    model: checkpoint.pth
+    dirname: /data2/jinvk/MLP
+    modal: omat24
+    calc_args:
+        device: cuda
+
+unitcell:
+    run: true
+    save: ./vc-relax/unitcell
+    # load: ./vc-relax/unitcell
+
+deform:
+    run: true
+    save: ./relax/deformed
+    write: 'e-v.csv'
+    delta: 0.01
+    Nsteps: 11
+    e_max: 0.05
+    e_min: -0.05
+    # load: ./relax/deformed/deformed.extxyz
+    # load_opt: ./relax/deformed/deformed_opt.extxyz 
+
+phonon:
+    save: ./static
+    # load: ./static
+    solver_type: phonopy
+    cutoff: 1.0e-07
+    symprec: 1.0e-05
+    primitive: [[1,0,0], [0,1,0], [0,0,1]]
+    random_seed: 42
+
+mesh:
+    numbers: [19, 19, 19]
+    run: true
+    save: ./harmonic
+    load: false
+
+dos:
+    run: true
+    load: false
+    save: ./harmonic
+
+band:
+    run: true
+    load: false
+    save: ./harmonic
+
+fc2:
+    save: ./harmonic
+    # load: ./harmonic
+    solver_type: phonopy
+    supercell: [2, 2, 2]
+    symmetrize: true
+    distance: 0.01
+    random_seed: 42
+
+thermal:
+    # load: ./harmonic
+    save: ./harmonic
+    t_step: 2
+    t_min: 0
+    t_max: 2000
+
+qha:
+    save: ./qha
+    run: true
+    eos: birch_murnaghan
+    sparse: 50
+    t_max: 1000
+    data: ./data
+    plot: ./plot
+    full: ./full
+
+
+opt:
+    unitcell:
+        fmax: 1.0e-06
+        steps: 30000
+        optimizer: fire
+        cell_filter: unitcell
+        mask: [1, 1, 1, 1, 1, 1]
+        fix_symm: true
+        fix_atom: false
+        logfile: ./vc-relax/full_opt.log
+
+    deform: 
+        fmax: 1.0e-06
+        steps: 30000
+        optimizer: fire
+        fix_symm: true 
+        fix_atom: false
+        logfile: ./relax/atomc_opt.log
+
+    elastic_tensor:
+        optimizer: fire
+        verbose: true
+        logfile: elastic_tensor.log
+        delta: 0.01
+        N_steps: 5
+        fmax: 0.001
+        steps: 1000
+...
