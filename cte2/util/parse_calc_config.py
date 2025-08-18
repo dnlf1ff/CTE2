@@ -1,18 +1,32 @@
 import os
 import warnings
 
+def check_opt_args(calc_conf):
+    assert isinstance(calc_conf['fmax'], float), 'fmax must be a float'
+    assert isinstance(calc_conf['steps'], (int, float)), 'steps must be a number ... right?'
+    assert calc_conf['optimizer'].lower() in ['lbfgs', 'fire', 'fire2']
+    assert isinstance((cell_filter:=calc_conf.get('cell_filter', None)), (str, type(None)))
+    if cell_filter is not None:
+        assert cell_filter.lower() in ['unitcell', 'frechet']
+        if (mask := calc_conf.get('mask', None)) is not None:
+            assert _islistinstance(mask, [int]), 'mask must be a list if cell_filter is set'
+    assert isinstance(calc_conf['fix_symm'], bool)
+    assert isinstance(calc_conf['fix_atom'], bool)
+    assert isinstance(calc_conf['logfile'], str)
+
+
 def check_calc_config(config):
     conf = config['calculator']
     calc_types = ['sevennet', '7net', '7net-mf', 'sevennet-mf', 'dpa', 'esen', 'uma', 'orb', 'vasp', 'dft']
 
     assert conf['calc_type'].lower() in calc_types
-    dirname = conf.get('dirname', None)
+    assert os.path.exists(dirname := conf['potential_dirname']), f"Potential directory {conf['potential_dirname']} does not exist"
+
     model = conf.get('model', None)
     modal = conf.get('modal', None)
 
-    if conf['calc_type'].lower() in ['vasp', 'dft']:
+    if conf['calc_type'].lower() in ['vasp', 'dft', 'fp', 'abinit', 'qe', 'siesta']:
         assert conf['functional'].lower() in ['pbe', 'pbe54', 'pbd52', 'mpa', 'mp', 'omat24']
-        dirname = conf.get('potcar_dirname', None)
 
     assert os.path.exists(dirname), f'directory for potential file {dirname} does not exists'
 

@@ -1,7 +1,6 @@
 from __future__ import annotations
 import warnings
 from phonopy import load
-from phonopy.api_phonopy import Phonopy
 import phonopy.file_IO as ph_IO
 import os
 from tqdm import tqdm
@@ -20,7 +19,7 @@ def process_harmonic(config):
     suffix_range = _get_suffix_list(**strain_args)
 
     for idx, suffix in enumerate(tqdm(suffix_range, desc='calculating harmonic properties')):
-        IM = False
+        Im = False
         h_dir = f"{config['harmonic']['save']}/e-{suffix}"
 
         if os.path.isfile(f"{h_dir}/phonopy_params.yaml"):
@@ -44,7 +43,7 @@ def process_harmonic(config):
                 f.write('Imaginary mode detected during mesh calculation suffix {suffix}..\n')
                 f.close()
             warnings.warn(f'Imaginary mode detected during mesh calculation suffix {suffix}..')
-            IM = True
+            Im = True
         
         pm_round = [[round(x, 2) for x in param] for param in config['phonon']['primitive']]
         sm_round = [int(x) for x in config['phonon']['supercell']]
@@ -54,7 +53,7 @@ def process_harmonic(config):
                     'Mesh': mesh_numbers, 'Im': IM}
         logger.phonon_recorder.update(phonon_recorder, idx=idx)
 
-        if IM:
+        if Im:
             continue
 
         try:

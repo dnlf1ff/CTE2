@@ -3,7 +3,6 @@ import os.path as osp
 from phonopy.api_qha import PhonopyQHA
 from phonopy.file_IO import read_thermal_properties_yaml, read_v_e
 from contextlib import redirect_stdout, redirect_stderr
-import pandas as pd
 import ase.io as ase_IO
 import warnings
 from cte2.util.utils import _get_suffix_list
@@ -63,7 +62,7 @@ def process_qha(config, calc=None):
                   'cv': cv, 'entropy': entropy, 'eos': config['qha']['eos'], 't_max': config['qha']['t_max'],
                   'verbose': True}
 
-    with open(f'{qha_dir}/qha.x', 'w') as f, redirect_stdout(f), redirect_stdout(f):
+    with open(f'{qha_dir}/qha.x', 'w') as f, redirect_stdout(f), redirect_stderr(f):
         qha = PhonopyQHA(**qha_kwargs)
    
     os.chdir(qha_plot)

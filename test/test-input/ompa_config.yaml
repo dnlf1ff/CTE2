@@ -1,43 +1,58 @@
 ---
+
 prefix: .
 
 data:
-    input: ./input/POSCAR-unitcell
+    input: ./test-input/POSCAR-Al
     load_args:
         format: vasp
-        index: 0 
+        index: 0
 
 calculator:
-    calc_type: sevennet
-    model: checkpoint.pth
-    dirname: /data2/jinvk/MLP
-    modal: omat24
+    calc_type: fp
+    functional: pbe
+    potential_dirname: .
+    dispersion: false
+    model: vasp
+    modal: pbe54
     calc_args:
-        device: cuda
+        device: cpu
 
 unitcell:
     run: true
-    save: ./vc-relax/unitcell
-    # load: ./vc-relax/unitcell
+    load: null
+    write: unitcell.csv
+    save: ./unitcell
+    opt: &id001
+        fmax: 0.001
+        steps: 1000
+        optimizer: fire2
+        cell_filter: unitcell
+        mask: [1, 1, 1, 0, 0, 0]
+        fix_symm: true
+        fix_atom: false
+        logfile: relax.log
 
 deform:
+    save: ./deform
+    write: deform.csv
+    opt: *id001
     run: true
-    save: ./relax/deformed
-    write: 'e-v.csv'
-    delta: 0.01
-    Nsteps: 11
-    e_max: 0.05
-    e_min: -0.05
-    # load: ./relax/deformed/deformed.extxyz
-    # load_opt: ./relax/deformed/deformed_opt.extxyz 
+    load: null
+    load_opt: null
+    delta: 0.02
+    Nsteps: 5
+    e_min: -0.04
+    e_max: 0.04
 
 phonon:
-    save: ./static
-    # load: ./static
-    solver_type: phonopy
-    cutoff: 1.0e-07
+    load: null
+    save: ./phonon
+    primitive: [1, 1, 1]
     symprec: 1.0e-05
-    primitive: [[1,0,0], [0,1,0], [0,0,1]]
+    supercell: [3, 3, 3]
+    symmtrize: true
+    distance: 0.01
     random_seed: 42
 
 mesh:
@@ -58,7 +73,6 @@ band:
 
 fc2:
     save: ./harmonic
-    # load: ./harmonic
     solver_type: phonopy
     supercell: [2, 2, 2]
     symmetrize: true
@@ -66,7 +80,6 @@ fc2:
     random_seed: 42
 
 thermal:
-    # load: ./harmonic
     save: ./harmonic
     t_step: 2
     t_min: 0
@@ -74,14 +87,13 @@ thermal:
 
 qha:
     save: ./qha
-    run: true
-    eos: birch_murnaghan
+    write: e-v.dat
+    t_max: 501
     sparse: 50
-    t_max: 1000
     data: ./data
     plot: ./plot
     full: ./full
-
+    eos: birch-murnahghan
 
 opt:
     unitcell:
@@ -93,15 +105,13 @@ opt:
         fix_symm: true
         fix_atom: false
         logfile: ./vc-relax/full_opt.log
-
-    deform: 
+    deform:
         fmax: 1.0e-06
         steps: 30000
         optimizer: fire
-        fix_symm: true 
+        fix_symm: true
         fix_atom: false
         logfile: ./relax/atomc_opt.log
-
     elastic_tensor:
         optimizer: fire
         verbose: true
@@ -110,4 +120,16 @@ opt:
         N_steps: 5
         fmax: 0.001
         steps: 1000
+
+harmonic:
+    save: ./harmonic
+    fc2: true
+    mesh: true
+    mesh_numbers: [48, 48, 48]
+    dos: true
+    band: true
+    symprec: 1.0e-05
+    t_min: 0
+    t_max: 501
+    t_step: 25
 ...

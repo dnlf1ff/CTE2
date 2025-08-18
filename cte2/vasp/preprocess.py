@@ -32,7 +32,7 @@ def process_input(config):
     unitcell = read(config['data']['input'], **config['data']['load_args'])
 
     write(f"{unitcell_dir}/POSCAR", unitcell, format='vasp')
-    write_mpr_potcar(f"{unitcell_dir}/POSCAR}", subdir=unitcell_dir, POTCAR_DIR=config['calculator']['potential_dir'])
+    write_mpr_potcar(f"{unitcell_dir}/POSCAR", subdir=unitcell_dir, POTCAR_DIR=config['calculator']['potential_dir'])
 
 
 def process_deform(config):

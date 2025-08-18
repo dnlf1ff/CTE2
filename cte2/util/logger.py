@@ -1,6 +1,6 @@
 import os, sys, time, datetime
 from datetime import timedelta
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 import numpy as np
 
 UNITCELL_LOG_KEYS = ['Formula','SPG_num', 'Conv','Length', 'Angle','Natom']
@@ -32,7 +32,7 @@ class Recorder:
         """ Initialize a recorder for logging results.
         Args:
             keys (list[str]): List of keys to be recorded.
-            num (Optional[int]): Number of records to initialize. If None, a single record is created. use for strained structions
+            num (Union[int]): Number of records to initialize. If None, a single record is created. use for strained structions
 
         Attributes:
             keys (list[str]): List of keys to be recorded.
@@ -51,7 +51,7 @@ class Recorder:
         else:
             self.result_dicts = result_dicts.copy()
 
-    def update(self, dct, idx: Optional[int, float]=None):
+    def update(self, dct, idx: Union[int, float]=None):
         np.set_printoptions(formatter={'float':'{: 0.2f}'.format})
         if idx is not None:
             for key in self.keys:
@@ -68,7 +68,7 @@ class Recorder:
         np.set_printoptions()
 
 class Logger(metaclass=Singleton):
-    def __init__(self, num: Optional[int, float] = 11, filename: Union[str, os.PathLike] = 'cte2.log'):
+    def __init__(self, num: Union[int, float]=11, filename: Union[str, os.PathLike] = 'cte2.log'):
         self.filename = filename
         self.init_time = time.time()
         self.num = num

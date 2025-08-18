@@ -1,18 +1,15 @@
-from cte2.util.logger import Logger
-from cte2.util.utils import _get_suffix_list, aseatoms2phonoatoms
+from cte2.util.utils import _get_suffix_list, aseatoms2phonoatoms, phonoatoms2aseatoms
 
 from phonopy.api_phonopy import Phonopy
 
 import numpy as np
 from tqdm import tqdm
-import warnings
 import ase.io as ase_IO
 from ase import Atoms
-import torch, gc, os, sys
+import os, sys
 
 def process_phonon(config):
-    desc='initiating phonopy with primitive matrix')
-    logger = Logger()
+    desc='initiating phonopy with primitive matrix'
 
     delta, Nsteps = config['deform']['delta'], config['deform']['Nsteps']
     e_min, e_max = config['deform']['e_min'], config['deform']['e_max']
@@ -49,7 +46,8 @@ def process_phonon(config):
                                   random_seed=config['fc2']['random_seed'])
             for j, sc in enumerate(phonon.supercells_with_displacements):
                 label = str(j+1).zfill(3)
-                atoms= Atoms(sc.symbols, cell=sc.cell, positions=sc.positions, pbc=True)
+                os.makedirs(f"{phonon_dir}/fc2-{label}", exist_ok=True)
+                atoms= phonoatoms2aseatoms(sc)
                 ase_IO.write(f"{phonon_dir}/fc2-{label}/POSCAR", atoms, format='vasp')
 
         phonon.save(f"{phonon_dir}/phonopy_disp.yaml")

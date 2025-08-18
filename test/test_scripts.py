@@ -31,14 +31,14 @@ DEFAULT_UNITCELL_CONFIG = {
     'load': None,
     'write': 'unitcell.csv',
     'save': './unitcell',
-    'opt': 'unitcell',
+    'opt': DEFAULT_OPT_ARGS,
 }
 
 
 DEFAULT_DEFORM_CONFIG = {
     'save': './deform',
     'write': 'deform.csv', 
-    'opt': 'deform',
+    'opt': DEFAULT_OPT_ARGS,
     'run': True,
     'load': None,
     'load_opt': None,

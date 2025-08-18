@@ -1,7 +1,6 @@
 from cte2.util.utils import _get_ratio_list, _get_suffix_list
 
 from tqdm import tqdm
-from ase import Atoms
 import ase.io as ase_IO
 import os
 
@@ -18,7 +17,7 @@ def scale_poscar(config):
 
     poscar_opt = open(f"{config['unitcell']['save']}/CONTCAR", 'r')
     lines = poscar_opt.readlines()
-    for idx, (ratio, suffix) in enumerate(tqdm(zip(ratio_list,suffix_list), desc=desc)):
+    for ratio, suffix in tqdm(zip(ratio_list,suffix_list), desc=desc):
         deform_dir = f"{config['deform']['save']}/e-{suffix}"
         os.makedirs(deform_dir, exist_ok = True)
         if not config['deform']['load']:
@@ -29,5 +28,5 @@ def scale_poscar(config):
                 poscar_file.write(line)
             poscar_file.close()
 
-    ase_IO.write(f"{config['deform']['save']}/deformed.extxyz", [ase_IO.read(f"{config['deform']['save']}/e-{suffix}/POSCAR"), format='vasp') for suffix in suffix_list])
+    ase_IO.write(f"{config['deform']['save']}/deformed.extxyz", images=[ase_IO.read(f"{config['deform']['save']}/e-{suffix}/POSCAR", format='vasp') for suffix in suffix_list])
     return

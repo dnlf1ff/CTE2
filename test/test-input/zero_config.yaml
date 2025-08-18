@@ -55,17 +55,35 @@ phonon:
     distance: 0.01
     random_seed: 42
 
-harmonic:
+mesh:
+    numbers: [19, 19, 19]
+    run: true
     save: ./harmonic
-    fc2: true
-    mesh: true
-    mesh_numbers: [48, 48, 48]
-    dos: true
-    band: true
-    symprec: 1.0e-05
+    load: false
+
+dos:
+    run: true
+    load: false
+    save: ./harmonic
+
+band:
+    run: true
+    load: false
+    save: ./harmonic
+
+fc2:
+    save: ./harmonic
+    solver_type: phonopy
+    supercell: [2, 2, 2]
+    symmetrize: true
+    distance: 0.01
+    random_seed: 42
+
+thermal:
+    save: ./harmonic
+    t_step: 2
     t_min: 0
-    t_max: 501
-    t_step: 25
+    t_max: 2000
 
 qha:
     save: ./qha
@@ -79,20 +97,39 @@ qha:
 
 opt:
     unitcell:
-        fmax: 1.0e-03
-        steps: 5000
+        fmax: 1.0e-06
+        steps: 30000
         optimizer: fire
         cell_filter: unitcell
         mask: [1, 1, 1, 1, 1, 1]
         fix_symm: true
-        logfile: relax.log
-
+        fix_atom: false
+        logfile: ./vc-relax/full_opt.log
     deform:
-        fmax: 1.0e-03
-        steps: 5000
+        fmax: 1.0e-06
+        steps: 30000
         optimizer: fire
-        fix_symm: true 
-        logfile: relax.log
+        fix_symm: true
+        fix_atom: false
+        logfile: ./relax/atomc_opt.log
+    elastic_tensor:
+        optimizer: fire
+        verbose: true
+        logfile: elastic_tensor.log
+        delta: 0.01
+        N_steps: 5
+        fmax: 0.001
+        steps: 1000
 
-
+harmonic:
+    save: ./harmonic
+    fc2: true
+    mesh: true
+    mesh_numbers: [48, 48, 48]
+    dos: true
+    band: true
+    symprec: 1.0e-05
+    t_min: 0
+    t_max: 501
+    t_step: 25
 ...

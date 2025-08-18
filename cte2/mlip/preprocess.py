@@ -6,10 +6,8 @@ from cte2.cte.preprocess import scale_poscar
 import numpy as np
 from tqdm import tqdm
 import warnings
-from ase import Atoms
 import ase.io as ase_IO
 import torch, gc
-import os
 
 def process_input(config, calc):
     logger = Logger()

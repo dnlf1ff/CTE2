@@ -97,14 +97,11 @@ def overwrite_default(config, argv: list[str] | None=None):
     config['prefix'] =args.prefix
     config['calculator']['calc_type'] =args.calc_type
     config['calculator']['functional'] =args.functional
+    config['calculator']['potential_dirname'] =args.potential_dirname
     
-    if args.calc_type.lower() in ['vasp', 'dft']:
-        config['calculator']['potcar_dirname'] =args.potcar_dirname
-    else:
-        config['calculator']['dispersion'] =args.dispersion
-        config['calculator']['dirname'] =args.dirname
-        config['calculator']['modal'] =args.modal
-        config['calculator']['model'] =args.model
+    config['calculator']['dispersion'] =args.dispersion
+    config['calculator']['modal'] =args.modal
+    config['calculator']['model'] =args.model
     return config
 
 def update_default_config(config):
@@ -135,19 +132,6 @@ def _isinstance_in_list(inp, insts):
 def _islistinstance(inps, insts):
     return all([_isinstance_in_list(inp, insts) for inp in inps])
 
-def check_opt_args(calc_conf):
-    assert isinstance(calc_conf['fmax'], float), 'fmax must be a float'
-    assert isinstance(calc_conf['steps'], (int, float)), 'steps must be a number ... right?'
-    assert calc_conf['optimizer'].lower() in ['lbfgs', 'fire', 'fire2']
-    assert isinstance((cell_filter:=calc_conf.get('cell_filter', None)), (str, type(None)))
-    if cell_filter is not None:
-        assert cell_filter.lower() in ['unitcell', 'frechet']
-        if (mask := calc_conf.get('mask', None)) is not None:
-            assert _islistinstance(mask, [int]), 'mask must be a list if cell_filter is set'
-    assert isinstance(calc_conf['fix_symm'], bool)
-    assert isinstance(calc_conf['fix_atom'], bool)
-    assert isinstance(calc_conf['logfile'], str)
-
 def check_data_config(config):
     config_data = config['data']
     assert os.path.exists(config_data['input']), 'input dir not found'
@@ -157,7 +141,6 @@ def check_unitcell_config(config):
     os.makedirs(conf['save'], exist_ok = True)
     if (load := conf['load']) is not None:
         assert os.path.exists(load)
-    check_opt_args(config['opt'][conf['opt']])
 
 def check_deform_config(config):
     conf = config['deform'].copy()
@@ -166,7 +149,6 @@ def check_deform_config(config):
         assert os.path.exists(load)
     assert 0 < conf['delta'] < 1
     assert isinstance(conf['Nsteps'], int)
-    check_opt_args(config['opt'][conf['opt']])
 
 def check_phonon_config(config):
     conf = config['phonon']
@@ -230,5 +212,5 @@ def parse_config(config, argv: list[str] | None=None):
     config = check_calc_config(config)
     config['root'] = os.path.abspath(os.getcwd()) # short stopper
     config['cwd'] = os.path.join(os.path.abspath(os.getcwd()), config['cwd'])
-    config['output'] = os.path.join(config['root'], 'output')
+    config['output'] = os.path.join(os.path.abspath(os.getcwd()), config['output'])
     return config
