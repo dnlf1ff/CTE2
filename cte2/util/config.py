@@ -58,9 +58,10 @@ DEFAULT_DEFORM_CONFIG = {
 DEFAULT_PHONON_CONFIG = {
     'load': None,
     'save': None,
+    'opt': None,
     'primitive': [1,1,1],
     'symprec': None,
-    'supercell': [3,3,3], 
+    'supercell': [3,3,3],
     'symmetrize': True,
     'distance': None,
     'random_seed': None
@@ -98,7 +99,7 @@ def overwrite_default(config, argv: list[str] | None=None):
     config['calculator']['calc_type'] =args.calc_type
     config['calculator']['functional'] =args.functional
     config['calculator']['potential_dirname'] =args.potential_dirname
-    
+
     config['calculator']['dispersion'] =args.dispersion
     config['calculator']['modal'] =args.modal
     config['calculator']['model'] =args.model
@@ -122,7 +123,11 @@ def update_default_config(config):
         for k, v in config_parse.items():
             if not isinstance(v, Essential):
                 continue
-            raise ValueError(f'{key}: {k} must be given')
+            if isinstance(v, Essential):
+                if config['calculator']['calc_type'].lower() in ['dft', 'vasp', 'fp']:
+                    continue
+                else:
+                    raise ValueError(f'{key}: {k} must be given')
         config[key] = config_parse
     return config
 
@@ -158,8 +163,8 @@ def check_phonon_config(config):
     assert isinstance(conf['symmetrize'], bool)
     assert isinstance(conf['distance'], float)
     assert _islistinstance(conf['supercell'], [int])
-    assert _islistinstance(conf['primitive'], [int])
- 
+    assert _islistinstance(conf['primitive'], [int]) or isinstance(conf['primitive'], str)
+
 def check_harmonic_config(config):
     conf = config['harmonic']
     os.makedirs(conf['save'], exist_ok=True)
@@ -187,6 +192,7 @@ def update_config_dirs(config):
     config['cwd'] = (cwd := f"./{prefix}")
     os.makedirs(cwd, exist_ok=True)
     os.makedirs('output', exist_ok=True)
+    config['output'] = './output'
     tasks = ['unitcell', 'deform', 'phonon', 'harmonic', 'qha']
     for task in tasks:
         if (save_path := config[task].get('save')) is not None:

@@ -37,15 +37,15 @@ DEFAULT_UNITCELL_CONFIG = {
 
 DEFAULT_DEFORM_CONFIG = {
     'save': './deform',
-    'write': 'deform.csv', 
+    'write': 'deform.csv',
     'opt': 'deform',
     'run': True,
     'load': None,
     'load_opt': None,
-    'delta': 0.02, 
-    'Nsteps': 5, 
-    'e_min': -0.04, 
-    'e_max': 0.04, 
+    'delta': 0.02,
+    'Nsteps': 5,
+    'e_min': -0.04,
+    'e_max': 0.04,
 }
 
 DEFAULT_PHONON_CONFIG = {
@@ -53,10 +53,10 @@ DEFAULT_PHONON_CONFIG = {
     'save': './phonon',
     'primitive': [1, 1, 1],
     'symprec': 1e-05,
-    'supercell': [3,3,3], 
+    'supercell': [3,3,3],
     'symmtrize': True,
-    'distance': 0.01, 
-    'random_seed': 42, 
+    'distance': 0.01,
+    'random_seed': 42,
 }
 
 
@@ -65,6 +65,7 @@ DEFAULT_HARMONIC_CONFIG = {
     'fc2': True,
     'mesh': True,
     'mesh_numbers': [48, 48, 48],
+    'thermal': True,
     'dos': True,
     'band': True,
     'symprec': 1e-05,
@@ -82,7 +83,7 @@ DEFAULT_QHA_CONFIG = {
     'data': './data',
     'plot': './plot',
     'full': './full',
-    'eos': 'birch-murnahghan',
+    'eos': 'birch_murnaghan',
 }
 
 

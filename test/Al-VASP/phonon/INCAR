@@ -1,0 +1,13 @@
+ADDGRID = True
+ALGO = Normal
+EDIFF = 1e-08
+ENCUT = 520.0
+IBRION = -1
+ISMEAR = 0
+LCHARG = False
+LREAL = False
+LWAVE = False
+NELMIN = 5
+NPAR = 4
+PREC = Accurate
+SIGMA = 0.01

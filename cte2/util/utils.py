@@ -63,6 +63,26 @@ def aseatoms2phonoatoms(atoms):
     )
     return phonoatoms
 
+def get_supercell_from_config(supercell_matrix):
+    supercell_matrix = np.array(supercell_matrix)
+    if len(supercell_matrix) == 1:
+        return np.diag(supercell_matrix)
+    else:
+        return supercell_matrix
+
+def get_primitive_from_config(primitive_matrix):
+    if isinstance(primitive_matrix, str):
+        if len(primitive_matrix) == 1:
+            return primitive_matrix.upper()
+        else:
+            return 'Auto'
+    elif isinstance(primitive_matrix, list):
+        primitive_matrix = np.array(primitive_matrix)
+        if len(primitive_matrix) == 1:
+            return np.diag(primitive_matrix)
+        else:
+            return primitive_matrix
+
 def get_supercell_matrix(approx_length, cell):
     a, b, c = cell.lengths()
 
@@ -83,21 +103,6 @@ def mesh_by_density(density, cell):
     meshb = math.ceil(b*density[1])
     meshc = math.ceil(c*density[2])
     return [mesha, meshb, meshc]
-
-def get_mesh_numbers(supercell_matrix):
-    supercell_matrix = np.array(supercell_matrix)
-    if len(supercell_matrix.shape) > 1:
-        diag_comp = np.diag(supercell_matrix)
-    else:
-        diag_comp = supercell_matrix
-    normalized = list(diag_comp/diag_comp.max())
-    mesh_numbers = []
-    for ratio in normalized:
-        if ratio < 1:
-            mesh_numbers.append(17)
-        else:
-            mesh_numbers.append(21)
-    return [48, 48, 48]
 
 def get_band_paths(cell):
     """
@@ -170,5 +175,6 @@ def _get_ratio_list(e_min, e_max, Nsteps=None, delta=None):
     strain_list = _get_strain_list(e_min, e_max, delta=delta, Nsteps=Nsteps)
     ratio_list = [1+strain for strain in strain_list]
     return ratio_list
+
 
 

@@ -55,36 +55,6 @@ phonon:
     distance: 0.01
     random_seed: 42
 
-mesh:
-    numbers: [19, 19, 19]
-    run: true
-    save: ./harmonic
-    load: false
-
-dos:
-    run: true
-    load: false
-    save: ./harmonic
-
-band:
-    run: true
-    load: false
-    save: ./harmonic
-
-fc2:
-    save: ./harmonic
-    solver_type: phonopy
-    supercell: [2, 2, 2]
-    symmetrize: true
-    distance: 0.01
-    random_seed: 42
-
-thermal:
-    save: ./harmonic
-    t_step: 2
-    t_min: 0
-    t_max: 2000
-
 qha:
     save: ./qha
     write: e-v.dat
@@ -93,7 +63,7 @@ qha:
     data: ./data
     plot: ./plot
     full: ./full
-    eos: birch-murnahghan
+    eos: birch_murnaghan
 
 opt:
     unitcell:
@@ -126,6 +96,7 @@ harmonic:
     fc2: true
     mesh: true
     mesh_numbers: [48, 48, 48]
+    thermal: true
     dos: true
     band: true
     symprec: 1.0e-05

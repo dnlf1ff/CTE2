@@ -28,7 +28,7 @@ class Singleton(type):
         return cls._instances[cls]
 
 class Recorder:
-    def __init__(self, keys: List[str], num: Union[int, float]):
+    def __init__(self, keys: List[str], num: Union[int, float]=None):
         """ Initialize a recorder for logging results.
         Args:
             keys (list[str]): List of keys to be recorded.

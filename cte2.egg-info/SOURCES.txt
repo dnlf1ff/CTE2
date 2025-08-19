@@ -35,3 +35,5 @@ cte2/vasp/__init__.py
 cte2/vasp/io.py
 cte2/vasp/postprocess.py
 cte2/vasp/preprocess.py
+test/test_config.py
+test/test_scripts.py

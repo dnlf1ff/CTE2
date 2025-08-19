@@ -19,10 +19,14 @@ def parse_args(argv: list[str] | None=None):
     parser.add_argument('--model', dest='model', type=str, default='.',
                         help='absolute directory of the U-MLIP potential')
 
-    parser.add_argument('--modal','--task', '--head','--task_name', dest='modal', type=str, 
+    parser.add_argument('--modal', '--head', dest='modal', type=str,
                         default='omat24',help='data modality for multi-functional U-MLIPs; mpa, omat24 etc.')
 
-    parser.add_argument('--dispersion', type=bool, 
+    parser.add_argument('--task', '--vasp_task', dest='task', type=str,
+                        default='harmonic',help='data modality for multi-functional U-MLIPs; mpa, omat24 etc.')
+
+
+    parser.add_argument('--dispersion', type=bool,
                         default=False, help='whether to exclude D3')
 
     return parser.parse_args(argv)

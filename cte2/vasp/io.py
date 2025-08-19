@@ -117,4 +117,4 @@ def write_mpr_potcar(poscar_dir: Union[str, os.PathLike], subdir: Union[str, os.
     atoms = read(poscar_dir, format='vasp')
     structure=AseAtomsAdaptor.get_structure(atoms)
     config= MPRelaxSet(structure)
-    write_potcar(potcar_config=config.CONFIG["POTCAR"], poscar=poscar, POTCAR_DIR=POTCAR_DIR, subdir=subdir)
+    write_potcar(potcar_config=config.CONFIG["POTCAR"], poscar=config.poscar, POTCAR_DIR=POTCAR_DIR, subdir=subdir)

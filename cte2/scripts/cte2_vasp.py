@@ -31,7 +31,7 @@ def main(argv: list[str] | None=None) -> None:
         process_deform(config)
 
     if args.task.lower() in ['phonon', 'static']:
-        process_deform(config)
+        process_phonon(config)
 
 
 

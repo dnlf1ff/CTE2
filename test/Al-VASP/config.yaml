@@ -1,0 +1,164 @@
+---
+
+prefix: Al-VASP
+
+data:
+    input: ./test-input/POSCAR-Al
+    load_args:
+        format: vasp
+        index: 0
+
+calculator:
+    calc_type: vasp
+    functional: pbe54
+    potential_dirname: ./test-input
+    dispersion: false
+    model: vasp
+    modal: pbe54
+    calc_args:
+        device: cpu
+
+unitcell:
+    run: true
+    load: null
+    write: unitcell.csv
+    save: ./Al-VASP/./unitcell
+    opt: !!python/object:cte2.util.config.Essential {}
+    incar:
+        PREC: Accurate
+        IBRION: 2
+        NSW: 20
+        NELMIN: 5
+        ISIF: 3
+        ENCUT: 520
+        EDIFF: 1E-08
+        EDIFFG: -1E-08
+        ISMEAR: 0
+        SIGMA: 1E-02
+        ALGO: Normal
+        LREAL: false
+        ADDGRID: true
+        LWAVE: false
+        LCHARG: false
+        NPAR: 4
+    kpoints:
+        comment: Kpoints for unitcell relaxation
+        nkpoints: 0
+        generation_style: Monkhorst
+        grid: [3, 3, 3]
+        kpoints: [3, 3, 3]
+        usershift: [0, 0, 0]
+
+deform:
+    save: ./Al-VASP/./deform
+    write: deform.csv
+    opt: !!python/object:cte2.util.config.Essential {}
+    run: true
+    load: null
+    load_opt: null
+    delta: 0.02
+    Nsteps: 5
+    e_min: -0.04
+    e_max: 0.04
+    incar:
+        PREC: Accurate
+        IBRION: 2
+        NSW: 20
+        NELMIN: 5
+        ISIF: 2
+        ENCUT: 520
+        EDIFF: 1E-08
+        EDIFFG: -1E-08
+        ISMEAR: 0
+        SIGMA: 1E-02
+        ALGO: Normal
+        LREAL: false
+        ADDGRID: true
+        LWAVE: false
+        LCHARG: false
+        NPAR: 4
+    kpoints:
+        comment: Kpoints for unitcell relaxation
+        nkpoints: 0
+        generation_style: Monkhorst
+        kpoints: [3, 3, 3]
+        usershift: [0, 0, 0]
+
+phonon:
+    load: null
+    save: ./Al-VASP/./phonon
+    opt: null
+    primitive: [1, 1, 1]
+    symprec: 1.0e-05
+    supercell: [3, 3, 3]
+    symmetrize: true
+    distance: 0.01
+    random_seed: 42
+    symmtrize: true
+    incar:
+        PREC: Accurate
+        IBRION: -1
+        NELMIN: 5
+        ISIF: 2
+        ENCUT: 520
+        EDIFF: 1E-08
+        ISMEAR: 0
+        SIGMA: 1E-02
+        ALGO: Normal
+        LREAL: false
+        ADDGRID: true
+        LWAVE: false
+        LCHARG: false
+        NPAR: 4
+    kpoints:
+        comment: Kpoints for unitcell relaxation
+        nkpoints: 0
+        generation_style: Monkhorst
+        kpoints: [3, 3, 3]
+        usershift: [0, 0, 0]
+
+harmonic:
+    save: ./Al-VASP/./harmonic
+    fc2: true
+    mesh: true
+    mesh_numbers: [48, 48, 48]
+    dos: true
+    band: true
+    symprec: 1.0e-05
+    t_min: 0
+    t_max: 501
+    t_step: 25
+    thermal: true
+
+qha:
+    save: ./Al-VASP/./qha
+    write: e-v.dat
+    t_max: 501
+    sparse: 50
+    data: ./data
+    plot: ./plot
+    full: ./full
+    eos: birch_murnaghan
+
+opt:
+    unitcell:
+        fmax: 0.001
+        steps: 5000
+        optimizer: fire
+        cell_filter: unitcell
+        mask: [1, 1, 1, 1, 1, 1]
+        fix_symm: true
+        logfile: relax.log
+    deform:
+        fmax: 0.001
+        steps: 5000
+        optimizer: fire
+        fix_symm: true
+        logfile: relax.log
+
+cwd: /Users/yujinkang/CTE2/test/./Al-VASP
+
+output: /Users/yujinkang/CTE2/test/./output
+
+root: /Users/yujinkang/CTE2/test
+...

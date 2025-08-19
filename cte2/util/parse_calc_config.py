@@ -27,6 +27,8 @@ def check_calc_config(config):
 
     if conf['calc_type'].lower() in ['vasp', 'dft', 'fp', 'abinit', 'qe', 'siesta']:
         assert conf['functional'].lower() in ['pbe', 'pbe54', 'pbd52', 'mpa', 'mp', 'omat24']
+        config['calculator']['model'] = conf['calc_type'] #TODO vasp/qe
+        config['calculator']['modal'] =  conf['functional']
 
     assert os.path.exists(dirname), f'directory for potential file {dirname} does not exists'
 
@@ -81,7 +83,7 @@ def check_calc_config(config):
 
         assert modal in UMA_MODALS.keys(), f'unknown UMA modal {modal}'
         assert os.path.isfile(potential), f'MLIP potential not found at {potential}'
-   
+
         if conf['dispersion']:
             if conf.get('functional', None) in UMA_FUNCTIONALS.values():
                 functional = config['calculator']['functional']
@@ -104,8 +106,8 @@ def check_calc_config(config):
         config['calculator']['calc_args']['dispersion'] = conf['dispersion']
 
     else:
-        print('smting is wrong ...')
-    
+        print('running module for fp right?')
+
 
     return config
 
