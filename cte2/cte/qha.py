@@ -24,7 +24,7 @@ def process_qha(config, calc=None):
     qha_full = config['qha']['full']
     ev_filename = f"{config['qha']['save']}/{config['qha']['write']}"
 
-    filenames= [] 
+    filenames= []
     ev_file = open(ev_filename, 'w', buffering = 1)
 
     if 'thin_number' in config['qha'].keys():

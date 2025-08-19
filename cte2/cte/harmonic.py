@@ -44,7 +44,7 @@ def process_harmonic(config):
                 f.close()
             warnings.warn(f'Imaginary mode detected during mesh calculation suffix {suffix}..')
             Im = True
-        
+
         pm_round = [[round(x, 2) for x in param] for param in config['phonon']['primitive']]
         sm_round = [int(x) for x in config['phonon']['supercell']]
         num_disp = int(len(phonon.supercells_with_displacements))

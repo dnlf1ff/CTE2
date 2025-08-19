@@ -28,7 +28,7 @@ unitcell   :
     load     : None
     write    : unitcell.csv
     save     : ./Al-VASP/./unitcell
-    opt      : <cte2.util.config.Essential object at 0x11fc070d0>
+    opt      : <cte2.util.config.Essential object at 0x16b053d90>
     incar    : {'PREC': 'Accurate', 'IBRION': 2, 'NSW': 20, 'NELMIN': 5, 'ISIF': 3, 'ENCUT': 520, 'EDIFF': '1E-08', 'EDIFFG': '-1E-08', 'ISMEAR': 0, 'SIGMA': '1E-02', 'ALGO': 'Normal', 'LREAL': False, 'ADDGRID': True, 'LWAVE': False, 'LCHARG': False, 'NPAR': 4}
     kpoints  : {'comment': 'Kpoints for unitcell relaxation', 'nkpoints': 0, 'generation_style': 'Monkhorst', 'grid': [3, 3, 3], 'kpoints': [3, 3, 3], 'usershift': [0, 0, 0]}
 
@@ -37,7 +37,7 @@ unitcell   :
 deform     :
     save     : ./Al-VASP/./deform
     write    : deform.csv
-    opt      : <cte2.util.config.Essential object at 0x11fc0c350>
+    opt      : <cte2.util.config.Essential object at 0x16b103850>
     run      : True
     load     : None
     load_opt : None
