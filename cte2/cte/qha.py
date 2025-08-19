@@ -3,8 +3,10 @@ import os.path as osp
 from phonopy.api_qha import PhonopyQHA
 from phonopy.file_IO import read_thermal_properties_yaml, read_v_e
 from contextlib import redirect_stdout, redirect_stderr
+import numpy as np
 import ase.io as ase_IO
 import warnings
+
 from cte2.util.utils import _get_suffix_list
 from cte2.util.io import DatToCsv
 from cte2.util.calc import single_point_calculate
@@ -19,9 +21,11 @@ def process_qha(config, calc=None):
 
     suffix_list = _get_suffix_list(**strain_args)
     qha_dir = config['qha']['save']
-    qha_plot = config['qha']['plot']
-    qha_data = config['qha']['data']
-    qha_full = config['qha']['full']
+    qha_plot = f"{qha_dir}/{config['qha']['plot']}"
+    qha_data = f"{qha_dir}/{config['qha']['data']}"
+    qha_full = f"{qha_dir}/{config['qha']['full']}"
+    primitive_factor = np.linalg.det(np.array(config['phonon']['primitive']))
+
     ev_filename = f"{config['qha']['save']}/{config['qha']['write']}"
 
     filenames= []
@@ -33,7 +37,7 @@ def process_qha(config, calc=None):
         thin_number = config['qha']['sparse']
     elif 't_step' in config['qha'].keys():
         warnings.warn('Using t_step as thin_number ... that F-V plots gonna be ugly')
-        thin_number = config['qha']['t_step']
+        thin_number = config['harmonic']['t_step']
     else:
         warnings.warn('No thin_number or sparse or t_step found in config, using default value of 100')
         thin_number = 100
@@ -47,12 +51,12 @@ def process_qha(config, calc=None):
              continue
 
         filenames.append(f'{harmonic_dir}/thermal_properties.yaml')
-        if calc is not None:
+        if calc is None:
              atoms = single_point_calculate(atoms=ase_IO.read(f"{deform_dir}/OUTCAR"))
         else:
              atoms = single_point_calculate(atoms=ase_IO.read(f"{deform_dir}/CONTCAR",format='vasp'),calc=calc)
 
-        ev_file.write(f'{atoms.get_volume()}{chr(9)}{atoms.get_potential_energy()}\n')
+        ev_file.write(f'{atoms.get_volume()*primitive_factor}{chr(9)}{atoms.get_potential_energy()*primitive_factor}\n')
          
     temperatures, cv, entropy, fe_phonon, _, _ = read_thermal_properties_yaml(filenames=filenames)
     volumes, free_energies = read_v_e(filename=ev_filename)
@@ -90,8 +94,8 @@ def process_qha(config, calc=None):
     qha.write_gruneisen_temperature()
 
     os.chdir(qha_full)
-    qha.write_helmholtz_volume_fitted(thin_number=config['qha']['t_step'])
-    qha.plot_pdf_helmholtz_volume(thin_number=config['qha']['t_step'])
+    qha.write_helmholtz_volume_fitted(thin_number=config['harmonic']['t_step'])
+    qha.plot_pdf_helmholtz_volume(thin_number=config['harmonic']['t_step'])
 
     os.chdir(qha_dir)
     bulk_modulus = qha._bulk_modulus.plot().savefig(f'{qha_dir}/{config["qha"]["eos"]}.png', dpi=600)

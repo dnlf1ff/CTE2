@@ -45,12 +45,12 @@ def process_harmonic(config):
             warnings.warn(f'Imaginary mode detected during mesh calculation suffix {suffix}..')
             Im = True
 
-        pm_round = [[round(x, 2) for x in param] for param in config['phonon']['primitive']]
+        pm_round = config['phonon']['primitive']
         sm_round = [int(x) for x in config['phonon']['supercell']]
-        num_disp = int(len(phonon.supercells_with_displacements))
+        num_disp = int(len(phonon.displacements))
 
         phonon_recorder = {'Index': idx, 'PM': pm_round, 'FC2':f'{sm_round}*{num_disp}',
-                    'Mesh': mesh_numbers, 'Im': IM}
+                    'Mesh': mesh_numbers, 'Im': Im}
         logger.phonon_recorder.update(phonon_recorder, idx=idx)
 
         if Im:
@@ -80,7 +80,7 @@ def process_harmonic(config):
 
         if config['harmonic']['dos']:
             dos_args = {'mesh': mesh_numbers, 'is_time_reversal': True, 'is_mesh_symmetry': True,
-                        'is_gamma_center': False, 'with_tight_requency_range': False, 'write_dat': True}
+                        'is_gamma_center': False, 'with_tight_frequency_range': False, 'write_dat': True}
             phonon.auto_total_dos(filename=f'{h_dir}/total_dos.dat', **dos_args)
             dos_plt = phonon.plot_total_dos()
             dos_plt.savefig(f'{h_dir}/total_dos.png', dpi=300)

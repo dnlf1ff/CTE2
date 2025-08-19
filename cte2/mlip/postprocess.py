@@ -17,20 +17,22 @@ def process_phonon(config):
 
     for idx, suffix in enumerate(tqdm(suffix_list, desc=desc)):
         phonon_dir = f"{config['phonon']['save']}/e-{suffix}"
+        harmonic_dir = f"{config['harmonic']['save']}/e-{suffix}"
         deform_dir = f"{config['deform']['save']}/e-{suffix}"
         os.makedirs(phonon_dir, exist_ok = True)
+        os.makedirs(harmonic_dir, exist_ok = True)
         atoms = ase_IO.read(f"{deform_dir}/CONTCAR", format='vasp')
         unitcell = aseatoms2phonoatoms(atoms)
 
         try:
             phonon = Phonopy(
                 unitcell=unitcell,
-                supercell_matrix=config['fc2']['supercell'],
+                supercell_matrix=config['phonon']['supercell'],
                 symprec= config['phonon']['symprec'],
-                primitive_matrix = np.diag(config['phonon']['primitive']).tolist(),
+                primitive_matrix = config['phonon']['primitive'],
             )
-            phonon.generate_displacements(distance=config['fc2']['distance'],
-                                  random_seed=config['fc2']['random_seed'])
+            phonon.generate_displacements(distance=config['phonon']['distance'],
+                                  random_seed=config['phonon']['random_seed'])
 
         except Exception as e:
             sys.stderr.write(f'Error {e} occured at {idx}')
@@ -38,16 +40,21 @@ def process_phonon(config):
 
             phonon = Phonopy(
                 unitcell=unitcell,
-                supercell_matrix=config['fc2']['supercell'],
+                supercell_matrix=config['phonon']['supercell'],
                 symprec= config['phonon']['symprec'],
                 primitive_matrix = np.diag([1,1,1]).tolist(),
             )
-            phonon.generate_displacements(distance=config['fc2']['distance'],
-                                  random_seed=config['fc2']['random_seed'])
-            for j, sc in enumerate(phonon.supercells_with_displacements):
-                label = str(j+1).zfill(3)
-                os.makedirs(f"{phonon_dir}/fc2-{label}", exist_ok=True)
-                atoms= phonoatoms2aseatoms(sc)
-                ase_IO.write(f"{phonon_dir}/fc2-{label}/POSCAR", atoms, format='vasp')
+
+            config['phonon']['primitive'] = np.diag([1,1,1]).tolist()
+            from cte2.util.io import dumpYAML
+            dumpYAML(config, f"{config['dir']['cwd']}/config_re.yaml")
+            phonon.generate_displacements(distance=config['phonon']['distance'],
+                                  random_seed=config['phonon']['random_seed'])
+
+        for j, sc in enumerate(phonon.supercells_with_displacements):
+            label = str(j+1).zfill(3)
+            os.makedirs(f"{phonon_dir}/fc2-{label}", exist_ok=True)
+            atoms= phonoatoms2aseatoms(sc)
+            ase_IO.write(f"{phonon_dir}/fc2-{label}/POSCAR", atoms, format='vasp')
 
         phonon.save(f"{phonon_dir}/phonopy_disp.yaml")

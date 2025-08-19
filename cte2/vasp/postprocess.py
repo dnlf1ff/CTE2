@@ -15,11 +15,12 @@ from typing import Dict, Any
 def post_unitcell(config):
     logger = Logger()
 
-    csv_file = open(f"{config['unitcell']['save']}/{config['deform']['write']}", "w", buffering=1)
+    csv_file = open(f"{config['dir']['cwd']}/{config['unitcell']['write']}", "w", buffering=1)
     csv_file.write('idx,energy,volume,natom,a,b,c,alpha,beta,gamma,conv\n')
     vrun = Vasprun(f"{config['unitcell']['save']}/vasprun.xml")
     write_csv(csv_file, vrun, idx='pre')
     write_csv(csv_file, vrun, idx='post')
+    csv_file.close()
 
     atoms = ase_IO.read(f"{config['unitcell']['save']}/POSCAR", format='vasp')
     init_spg = get_spgnum(atoms)
@@ -58,15 +59,15 @@ def post_deform(config):
             'Nsteps': config['deform']['Nsteps']}
 
     suffix_list = _get_suffix_list(**strain_args)
-    csv_file = open(f"{config['deform']['save']}/{config['deform']['write']}", "w", buffering=1)
+    csv_file = open(f"{config['dir']['cwd']}/{config['deform']['write']}", "w", buffering=1)
     csv_file.write('idx,energy,volume,natom,a,b,c,alpha,beta,gamma,conv\n')
 
     for idx, suffix in enumerate(tqdm(suffix_list, desc='writing e-v.csv file')):
         deform_dir = f"{config['deform']['save']}/e-{suffix}"
 
         vrun = Vasprun(f"{deform_dir}/vasprun.xml")
-        write_csv(csv_file, vrun, idx='pre')
-        write_csv(csv_file, vrun, idx='post')
+        write_csv(csv_file, vrun, idx=f'pre-{suffix}')
+        write_csv(csv_file, vrun, idx=f'post-{suffix}')
 
         atoms = ase_IO.read(f"{deform_dir}/POSCAR", format='vasp')
         init_spg = get_spgnum(atoms)
@@ -77,13 +78,13 @@ def post_deform(config):
 
         if not (init_spg == spg_num):
             warnings.warn(
-                f'space group number changed while optimizing {atoms} (input structure)'
+                f'space group number changed while optimizing {atoms} (input structure)\n'
                 + f'{init_spg} > {spg_num}'
                 )
 
         if not (init_vol == volume):
             warnings.warn(
-                f'volume of cell changed while optimizing {atoms} with ISIF = 2'
+                f'volume of cell changed while optimizing {atoms} with ISIF = 2\n'
                 + f'{init_vol} > {volume}'
                 )
 

@@ -1,3 +1,4 @@
+import os
 DEFAULT_OPT_ARGS = {
     'fmax': 1e-3,
     'steps': 1000,
@@ -19,6 +20,13 @@ DEFAULT_CALC_CONFIG = {
     'calc_args': {'device': 'cpu'},
     }
 
+
+DEFAULT_DIR_CONFIG = {
+    'prefix': 'Al-VASP', # file prefix
+    'output': '.output',
+    'cwd': f'{os.path.abspath(os.getcwd())}/./Al-VASP',
+    'root': os.path.abspath(os.getcwd()),
+}
 
 DEFAULT_DATA_CONFIG = {
     'input': './test-input/POSCAR-Al',
@@ -67,6 +75,7 @@ DEFAULT_HARMONIC_CONFIG = {
     'mesh_numbers': [48, 48, 48],
     'thermal': True,
     'dos': True,
+    'pdos': True,
     'band': True,
     'symprec': 1e-05,
     't_min': 0,
@@ -80,9 +89,9 @@ DEFAULT_QHA_CONFIG = {
     'write': 'e-v.dat',
     't_max': 501,
     'sparse': 50,
-    'data': './data',
-    'plot': './plot',
-    'full': './full',
+    'data': './qha/data',
+    'plot': './qha/plot',
+    'full': './qha/full',
     'eos': 'birch_murnaghan',
 }
 

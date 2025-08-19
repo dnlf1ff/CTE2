@@ -21,9 +21,9 @@ def main(argv: list[str] | None=None) -> None:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
     config = parse_config(config, argv)
-    dumpYAML(config, f'{config["cwd"]}/config.yaml')
+    dumpYAML(config, f'{config["dir"]["cwd"]}/config.yaml')
 
-    logger = Logger(num = config["deform"]["Nsteps"], filename=f"{config['cwd']}/cte2.log")
+    logger = Logger(num = config["deform"]["Nsteps"], filename=f"{config['dir']['cwd']}/cte2.log")
     logger.greet()
     logger.writeline('Reading config successful!')
     logger.log_config(config)

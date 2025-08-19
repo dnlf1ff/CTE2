@@ -17,7 +17,7 @@ def calculate_fc2(phonon: Phonopy, phonon_dir: Union[str, os.PathLike], calc: Op
     for idx in range(len(phonon.displacements)):
         label = str(idx+1).zfill(3)
         if calc is not None:
-            ase_IO.read(f"{phonon_dir}/fc2-{label}/POSCAR", atoms, format='vasp')
+            atoms = ase_IO.read(f"{phonon_dir}/fc2-{label}/POSCAR", format='vasp')
             atoms = single_point_calculate(atoms, calc)
             ase_IO.write(f"{phonon_dir}/fc2-{label}/CONTCAR", atoms, format='vasp')
 
@@ -53,15 +53,16 @@ def process_fc2(config, calc=None):
             try:
                 fc2 = ph_IO.parse_FORCE_CONSTANTS(fc2_file)
                 phonon.force_constants = fc2
-            except:
+            except FileNotFoundError:
                 phonon = calculate_fc2(phonon, phonon_dir, calc)
+            except:
+                phonon = calculate_fc2(phonon, phonon_dir)
 
             ph_IO.write_FORCE_CONSTANTS(
                 phonon.force_constants, filename=fc2_file)
         else:
             try:
-                fc2 = ph_IO.parse_FORCE_CONSTANTS(fc2_file)
-                phonon.force_constants = fc2
+                phonon = calculate_fc2(phonon, phonon_dir, calc)
             except:
                 phonon = calculate_fc2(phonon, phonon_dir)
 

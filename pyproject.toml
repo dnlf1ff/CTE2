@@ -18,6 +18,9 @@ requires-python = ">=2.7"
 dependencies = [
     "sevenn",
     "numpy",
+    "pymatgen",
+    "ase",
+    "spglib"
     ]
 
 [project.scripts]
@@ -28,7 +31,13 @@ cte2-vasp = "cte2.scripts.cte2_vasp:main"
 cte2-mlip = "cte2.scripts.cte2_mlip:main"
 
 cte2-fc2 = "cte2.scripts.cte2_fc2:main"
+cte2-vasp-fc2 = "cte2.scripts.cte2_fc2:main"
+cte2-mlip-fc2 = "cte2.scripts.cte2_fc2:main"
+cte2-vasp-harmonic = "cte2.scripts.cte2_harmonic:main"
+cte2-mlip-harmonic = "cte2.scripts.cte2_harmonic:main"
 cte2-harmonic = "cte2.scripts.cte2_harmonic:main"
+cte2-vasp-qha = "cte2.scripts.cte2_qha:main"
+cte2-mlip-qha = "cte2.scripts.cte2_qha:main"
 cte2-qha = "cte2.scripts.cte2_qha:main"
 
 [tool.setuptools]

@@ -7,7 +7,7 @@ from pymatgen.io.vasp import Vasprun
 
 from cte2.vasp.io import write_mpr_potcar, write_incar, write_kpoints
 from cte2.util.logger import Logger
-from cte2.util.utils import _get_suffix_list, write_csv, get_spgnum, get_supercell_from_config, get_primitive_from_config
+from cte2.util.utils import _get_suffix_list, write_csv, get_spgnum
 
 from cte2.util.config import Essential
 
@@ -87,10 +87,11 @@ def process_phonon(config):
 
     for suffix in tqdm(suffix_list, desc='processing phonon supercells'):
         contcar = read(f'{config["deform"]["save"]}/e-{suffix}/CONTCAR', format='vasp')
+        os.makedirs(f'{phonon_dir}/e-{suffix}', exist_ok=True)
 
         phonon = Phonopy(unitcell=aseatoms2phonoatoms(contcar),
-                         supercell_matrix=get_supercell_from_config(config['phonon']['supercell']),
-                         primitive_matrix=get_primitive_from_config(config['phonon']['primitive']))
+                         supercell_matrix=config['phonon']['supercell'],
+                         primitive_matrix=config['phonon']['primitive'],)
 
         phonon.generate_displacements()
         phonon.save(f'{phonon_dir}/e-{suffix}/phonopy_disp.yaml')

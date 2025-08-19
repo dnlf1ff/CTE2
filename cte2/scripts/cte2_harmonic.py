@@ -13,9 +13,9 @@ def main(argv: list[str]|None=None) -> None:
         config = yaml.load(f, Loader=yaml.FullLoader)
    
     config = parse_config(config)
-    logger = Logger(filename=f"{config['cwd']}/har.log", num = config['deform']['Nsteps'])
+    logger = Logger(filename=f"{config['dir']['cwd']}/har.log", num = config['deform']['Nsteps'])
     logger.log_config(config)
-    dumpYAML(config, f"{config['cwd']}/config_har.yaml")
+    dumpYAML(config, f"{config['dir']['cwd']}/config_har.yaml")
 
     process_harmonic(config)
     logger.log_phonon()

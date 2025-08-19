@@ -15,7 +15,7 @@ def process_input(config, calc):
     csv_file = open(f"{config['unitcell']['save']}/{config['unitcell']['write']}", "w", buffering = 1)
     csv_file.write('idx,energy,volume,natom,a,b,c,alpha,beta,gamma,conv\n')
     opt = config['unitcell']['opt']
-    ase_atom_relaxer = aar_from_config(config, calc, opt_type=opt)
+    ase_atom_relaxer = aar_from_config(config, calc, opt_type=opt, logfile=f"{config['unitcell']['save']}/relax.log")
     atoms = ase_IO.read(config['data']['input'], **config['data']['load_args'])
     atoms.info['init_spg_num'] = init_spg = get_spgnum(atoms)
     atoms = ase_atom_relaxer.update_atoms(atoms)
@@ -59,8 +59,7 @@ def process_deform(config, calc):
     desc = 'relaxing strained atoms'
     logger = Logger()
     opt = config['deform']['opt']
-    ase_atom_relaxer = aar_from_config(config, calc, opt_type=opt)
-    csv_file = open(f"{config['deform']['save']}/{config['deformed']['write']}", "w", buffering = 1)
+    csv_file = open(f"{config['deform']['save']}/{config['deform']['write']}", "w", buffering = 1)
     csv_file.write('idx,energy,volume,natom,a,b,c,alpha,beta,gamma,conv\n')
     delta, Nsteps = config['deform']['delta'], config['deform']['Nsteps']
     e_min, e_max = config['deform']['e_min'], config['deform']['e_max']
@@ -74,6 +73,7 @@ def process_deform(config, calc):
     for idx, (suffix, strain) in enumerate(tqdm(zip(suffix_list, strain_list), desc=desc)):
         deform_dir = f"{config['deform']['save']}/e-{suffix}"
 
+        ase_atom_relaxer = aar_from_config(config, calc, opt_type=opt, logfile=f"{deform_dir}/relax_e-{suffix}.log")
         atoms = ase_IO.read(f"{deform_dir}/POSCAR")
         atoms.info['init_spg_num'] = init_spg = get_spgnum(atoms)
         init_vol = atoms.get_volume()
@@ -92,7 +92,7 @@ def process_deform(config, calc):
 
         volume = atoms.get_volume()
 
-        write_csv(csv_file, atoms, idx=f'post-e-{strain}')
+        write_csv(csv_file, atoms, idx=f'post-e-{suffix}')
         ase_IO.write(f"{deform_dir}/CONTCAR", atoms, format='vasp')
 
         if not (init_spg == spg_num):
@@ -104,7 +104,7 @@ def process_deform(config, calc):
         if not (init_vol == volume):
             relax_conf = config["opt"][config["deform"]["opt"]]
             warnings.warn(
-                f'volume of cell changed while optimizing {atoms} with ASE {relax_conf["filter"]} filter and mask {relax_conf["mask"]}'
+                f'volume of cell changed while optimizing {atoms} with ASE {relax_conf}'
                 + f'{init_vol} > {volume}'
                 )
 

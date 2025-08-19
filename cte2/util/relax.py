@@ -98,7 +98,7 @@ def aar_from_config(config, calc, opt_type, logfile=None):
     if logfile is not None:
         arr_args['logfile'] = logfile
     else:
-        arr_args['logfile'] = f"{config['cwd']}/{opt}.log"
+        arr_args['logfile'] = f"{config['dir']['cwd']}/{opt}.log"
 
     arr_args['calc'] = calc
     arr_args['optimizer'] = opt
