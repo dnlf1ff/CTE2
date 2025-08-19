@@ -1,24 +1,30 @@
-from ase.io import read, write
+import ase.io  as ase_IO
+from ase import Atoms
+from ase.cell import Cell
+
 from tqdm import tqdm
-import os, shutil
+import os, shutil, gc, warnings
 
 from pymatgen.io.vasp import Vasprun
+from cte2.util.logger import Logger
+from cte2.util.utils import _get_suffix_list, write_csv, get_spgnum
 
-from hotpy.util.logger import Logger
-from hotpy.util.utils import _get_suffix_list, write_csv, get_spgnum
+
+from typing import Dict, Any
 
 def post_unitcell(config):
     logger = Logger()
 
-    csv_file = open(f"{config['unitcell']['save']}/{config['deform']['write']}", "w", buffering=1)
+    csv_file = open(f"{config['dir']['cwd']}/{config['unitcell']['write']}", "w", buffering=1)
     csv_file.write('idx,energy,volume,natom,a,b,c,alpha,beta,gamma,conv\n')
     vrun = Vasprun(f"{config['unitcell']['save']}/vasprun.xml")
     write_csv(csv_file, vrun, idx='pre')
     write_csv(csv_file, vrun, idx='post')
+    csv_file.close()
 
-    atoms = read(f"{config['unitcell']['save']/POSCAR")
+    atoms = ase_IO.read(f"{config['unitcell']['save']}/POSCAR", format='vasp')
     init_spg = get_spgnum(atoms)
-    outcar = read(f"{config['unitcell']['save']/OUTCAR")
+    outcar = ase_IO.read(f"{config['unitcell']['save']}/OUTCAR")
     spg_num = get_spgnum(outcar)
 
     spg_same = (spg_num == init_spg)
@@ -29,7 +35,7 @@ def post_unitcell(config):
             + f'{init_spg} > {spg_num}'
             )
     if not vrun.converged:
-        step = config['unitcell']['incar']
+        incar = config['unitcell']['incar']
         warnings.warn(
                 f'unitcell structure {atoms} did not converged with in incar: {incar}'
             )
@@ -53,37 +59,37 @@ def post_deform(config):
             'Nsteps': config['deform']['Nsteps']}
 
     suffix_list = _get_suffix_list(**strain_args)
-    csv_file = open(f"{config['deform']['save']}/{config['deform']['write']}", "w", buffering=1)
+    csv_file = open(f"{config['dir']['cwd']}/{config['deform']['write']}", "w", buffering=1)
     csv_file.write('idx,energy,volume,natom,a,b,c,alpha,beta,gamma,conv\n')
 
     for idx, suffix in enumerate(tqdm(suffix_list, desc='writing e-v.csv file')):
         deform_dir = f"{config['deform']['save']}/e-{suffix}"
 
         vrun = Vasprun(f"{deform_dir}/vasprun.xml")
-        write_csv(csv_file, vrun, idx='pre')
-        write_csv(csv_file, vrun, idx='post')
+        write_csv(csv_file, vrun, idx=f'pre-{suffix}')
+        write_csv(csv_file, vrun, idx=f'post-{suffix}')
 
-        atoms = read(f"{deform_dir}/POSCAR")
+        atoms = ase_IO.read(f"{deform_dir}/POSCAR", format='vasp')
         init_spg = get_spgnum(atoms)
         init_vol = atoms.get_volume()
-        outcar = read(f"{deform_dir}/OUTCAR")
+        outcar = ase_IO.read(f"{deform_dir}/OUTCAR")
         spg_num = get_spgnum(outcar)
         volume = outcar.get_volume()
 
         if not (init_spg == spg_num):
             warnings.warn(
-                f'space group number changed while optimizing {atoms} (input structure)'
+                f'space group number changed while optimizing {atoms} (input structure)\n'
                 + f'{init_spg} > {spg_num}'
                 )
 
         if not (init_vol == volume):
             warnings.warn(
-                f'volume of cell changed while optimizing {atoms} with ISIF = 2'
+                f'volume of cell changed while optimizing {atoms} with ISIF = 2\n'
                 + f'{init_vol} > {volume}'
                 )
 
         if not vrun.converged:
-            step = config['deform']['incar']
+            incar = config['deform']['incar']
             warnings.warn(
                     f'unitcell structure {atoms} did not converged with in incar: {incar}'
                 )
@@ -92,10 +98,10 @@ def post_deform(config):
                                'Angle': outcar.cell.angles(), 'Length': outcar.cell.lengths(),
                                'Energy': outcar.get_potential_energy(force_consistent=True), 'Volume': volume}
 
-            logger.deform_recorder.update(dct = unitcell_recorder, idx=idx)
+            logger.deform_recorder.update(dct = deform_recorder, idx=idx)
 
+        del atoms, vrun, outcar
+        gc.collect()
     csv_file.close()
-    del atoms, vrun, outcar, csv_file
-    gc.collect()
 
 

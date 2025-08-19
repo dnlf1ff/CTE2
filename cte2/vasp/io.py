@@ -1,9 +1,13 @@
 from ase.io import read
+from ase import Atoms
+import os
 from pymatgen.io.vasp.sets import MPRelaxSet
 from pymatgen.io.vasp import Potcar, Poscar, Incar, Kpoints
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.core import Structure
 import numpy as np
+
+from typing import Union, Dict
 
 class Essential:
     pass
@@ -79,8 +83,8 @@ KPOINTS_FORCE = {
         'usershift': [0, 0, 0]
     }
 
-def write_incar(incar_dict, subdir):
-    incar = Incar.from_dict(incar_dict)
+def write_incar(incar_dct, subdir: Union[str, os.PathLike]):
+    incar = Incar.from_dict(incar_dct)
     if incar['IBRION'] == -1:
         incar.pop('NSW', None)
         incar.pop('EDIFFG', None)
@@ -88,11 +92,11 @@ def write_incar(incar_dict, subdir):
 
     incar.write_file(f'{subdir}/INCAR')
 
-def write_kpoints(r_dict, subdir):
-    incar = Incar.from_dict(incar_dict)
-    incar.write_file(f'{subdir}/INCAR')
+def write_kpoints(kpoints_dct, subdir: Union[str, os.PathLike]):
+    kpoints = Kpoints.from_dict(kpoints_dct)
+    kpoints.write_file(f'{subdir}/KPOINTS')
 
-def write_potcar(poscar, potcar_config, subdir, POTCAR_DIR):
+def write_potcar(potcar_config, poscar: Poscar, POTCAR_DIR: Union[str, os.PathLike], subdir: Union[str, os.PathLike]):
     elements=poscar.site_symbols
     full_potcar=[]
     for el in elements:
@@ -101,7 +105,7 @@ def write_potcar(poscar, potcar_config, subdir, POTCAR_DIR):
             potcar_name_local = 'Yb_3'
         if el == 'W':
             potcar_name_local = 'W_sv'
-        potcar_path = POTCAR_PREFIX +'/'+ potcar_name_local + '/'+ "POTCAR"
+        potcar_path = f"{POTCAR_DIR}/{potcar_name_local}/POTCAR"
         with open(potcar_path, "r") as f:
             data = f.readlines()
         full_potcar.extend(data)
@@ -109,8 +113,8 @@ def write_potcar(poscar, potcar_config, subdir, POTCAR_DIR):
     with open(potcar_file,"w") as f:
         f.write("".join(full_potcar))
 
-def write_mpr_potcar(poscar_dir, subdir, POTCAR_DIR):
-    atoms = read(poscar_dir)
+def write_mpr_potcar(poscar_dir: Union[str, os.PathLike], subdir: Union[str, os.PathLike], POTCAR_DIR: Union[str, os.PathLike]):
+    atoms = read(poscar_dir, format='vasp')
     structure=AseAtomsAdaptor.get_structure(atoms)
     config= MPRelaxSet(structure)
-    write_potcar(config.poscar, config.CONFIG["POTCAR"], POTCAR_PREFIX=POTCAR_PREFIX, subdir=subdir)
+    write_potcar(potcar_config=config.CONFIG["POTCAR"], poscar=config.poscar, POTCAR_DIR=POTCAR_DIR, subdir=subdir)

@@ -1,26 +1,27 @@
 from cte2.util.logger import Logger
-from cte2.cui.argparser import parse_args
-from cte2.cui.config import parse_config
+from cte2.util.argparser import parse_args
+from cte2.util.config import parse_config
+from cte2.util.io import dumpYAML
+from cte2.util.calc import calc_from_config
 from cte2.cte.fc2 import process_fc2
 
+import os, sys, yaml
+
 def main(argv: list[str]|None=None) -> None:
-    args = vasp_parsers(argv)
+    args = parse_args(argv)
     config_dir = args.config 
 
     with open(config_dir, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
    
-    config = parse_config_yaml(config)
-    process_fc2(config)
+    config = parse_config(config)
+    logger = Logger(filename=f"{config['dir']['cwd']}/fc2.log", num = config['deform']['Nsteps'])
+    logger.log_config(config)
+    dumpYAML(config, f"{config['dir']['cwd']}/config_fc2.yaml")
 
-    if args.calc_type.lower() in ['vasp', 'dft']:
-        from cte2.vasp.postprocess as process_phonon, post_unitcell, post_deform
-        post_unitcell(config)
-        post_deform(config)
-        process_fc2(config)
-    else:
-        calc = calc_from_config(config)
-        process_fc2(config, config)
+    calc = calc_from_config(config)
+
+    process_fc2(config, calc=calc)
 
 if __name__ == '__main__':
     main()

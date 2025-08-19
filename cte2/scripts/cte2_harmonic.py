@@ -1,16 +1,22 @@
 from cte2.util.logger import Logger
-from cte2.cui.argparser import parse_args
-from cte2.cui.config import parse_config
+from cte2.util.argparser import parse_args
+from cte2.util.config import parse_config
+from cte2.util.io import dumpYAML
 from cte2.cte.harmonic import process_harmonic
 
-def main(argv: list[str]|None=None) -> None:
-    args = vasp_parsers(argv)
-    config_dir = args.config 
+import yaml
 
+def main(argv: list[str]|None=None) -> None:
+    args = parse_args(argv)
+    config_dir = args.config
     with open(config_dir, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
    
-    config = parse_config_yaml(config)
+    config = parse_config(config)
+    logger = Logger(filename=f"{config['dir']['cwd']}/har.log", num = config['deform']['Nsteps'])
+    logger.log_config(config)
+    dumpYAML(config, f"{config['dir']['cwd']}/config_har.yaml")
+
     process_harmonic(config)
     logger.log_phonon()
 

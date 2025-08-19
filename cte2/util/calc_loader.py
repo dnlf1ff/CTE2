@@ -99,6 +99,7 @@ UMA_FUNCTIONALS = {
     }
   
 # https://www.aissquare.com/models/detail?pageType=models&name=DPA-2.3.1-v3.0.0rc0&id=287#data-used-for-pretraining
+
 def load_dpa_calc(config):
     from deepmd.calculator import DP
     calc_args = config['calculator']['calc_args']
@@ -180,7 +181,11 @@ def load_calc(config):
     elif calc_type.lower() == 'uma':
         calc = load_uma_calc(config)
 
-    else:
+    elif calc_type.lower() in ['dft', 'vasp']:
+        warnings.warn('VASP calculator is not implemented in this version. The script will read vasprun.xml and OUTCAR files to extract energies and forces.')
         calc = None
+
+    else:
         raise NotImplementedError
+
     return calc

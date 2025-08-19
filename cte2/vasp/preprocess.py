@@ -5,10 +5,13 @@ import os, shutil
 
 from pymatgen.io.vasp import Vasprun
 
-from hotpy.vasp.io import write_mpr_potcar, write_incar, write_kpoints
-from hotpy.util.logger import Logger
-from hotpy.util.utils import _get_suffix_list, write_csv, get_spgnum
+from cte2.vasp.io import write_mpr_potcar, write_incar, write_kpoints
+from cte2.util.logger import Logger
+from cte2.util.utils import _get_suffix_list, write_csv, get_spgnum
 
+from cte2.util.config import Essential
+
+from typing import Dict, Any
 
 def update_settings(dct_default, dct_from_config):
     dct = dct_default.copy()
@@ -16,11 +19,11 @@ def update_settings(dct_default, dct_from_config):
     for k, v in dct.items():
         if not isinstance(v, Essential):
             continue
-        raise ValueError(f'{key}: {k} must be given')
+        raise ValueError(f'{k}: {v} must be given')
     return dct
 
 def process_input(config):
-    from hotpy.vasp.io import INCAR_UNITCELL, KPOINTS_RELAX
+    from cte2.vasp.io import INCAR_UNITCELL, KPOINTS_RELAX
     unitcell_dir = config['unitcell']['save']
     incar = update_settings(INCAR_UNITCELL, config['unitcell']['incar'].copy())
     write_incar(incar, unitcell_dir)
@@ -29,19 +32,19 @@ def process_input(config):
     unitcell = read(config['data']['input'], **config['data']['load_args'])
 
     write(f"{unitcell_dir}/POSCAR", unitcell, format='vasp')
-    write_mpr_potcar(f"{unitcell_dir}/POSCAR}", subdir=unitcell_dir, args.potcar_dir)
+    write_mpr_potcar(poscar_dir=f"{unitcell_dir}/POSCAR", subdir=unitcell_dir, POTCAR_DIR=config['calculator']['potential_dirname'])
 
 
 def process_deform(config):
-    from hotpy.vasp.io import INCAR_DEFORM, KPOINTS_RELAX
-    from hotpy.cte.preprocess import scale_poscar
+    from cte2.vasp.io import INCAR_DEFORMED, KPOINTS_RELAX
+    from cte2.cte.preprocess import scale_poscar
     deform_dir = config['deform']['save']
 
-    incar = update_settings(INCAR_DEFORM, config['deform']['incar'].copy())
+    incar = update_settings(INCAR_DEFORMED, config['deform']['incar'].copy())
     write_incar(incar, deform_dir)
     kpoints = update_settings(KPOINTS_RELAX, config['deform']['kpoints'].copy())
     write_kpoints(kpoints, deform_dir)
-    write_mpr_potcar(f"{deform_dir}/POSCAR", subdir=config['deform']['save'], args.potcar_dir)
+    write_mpr_potcar(f"{config['unitcell']['save']}/CONTCAR", subdir=config['deform']['save'], POTCAR_DIR=config['calculator']['potential_dirname'])
     scale_poscar(config)
 
     strain_args = {
@@ -59,9 +62,9 @@ def process_deform(config):
         shutil.copy(f"{deform_dir}/INCAR", prefix)
 
 def process_phonon(config):
-    from hotpy.vasp.io import INCAR_FORCE, KPOINTS_FORCE
-    from phonopy_api import Phonopy
-    from hotpy.util.utils import aseatoms2phonoatoms
+    from cte2.vasp.io import INCAR_FORCE, KPOINTS_FORCE
+    from phonopy.api_phonopy import Phonopy
+    from cte2.util.utils import aseatoms2phonoatoms
 
     phonon_dir = config['phonon']['save']
 
@@ -69,9 +72,9 @@ def process_phonon(config):
     write_incar(incar, config['phonon']['save'])
     kpoints = update_settings(KPOINTS_FORCE, config['phonon']['kpoints'].copy())
     write_incar(incar, phonon_dir)
-    kpoints = update_settings(KPOINTS_RELAX, config['phonon']['kpoints'].copy())
+    kpoints = update_settings(KPOINTS_FORCE, config['phonon']['kpoints'].copy())
     write_kpoints(kpoints, phonon_dir)
-    write_mpr_potcar(f"{phonon_dir}/POTCAR", subdir=config['phonon']['save'], args.potcar_dir)
+    write_mpr_potcar(f"{config['unitcell']['save']}/POSCAR", subdir=config['phonon']['save'], POTCAR_DIR=config['calculator']['potential_dirname'])
     kpoints_file, incar_file, potcar_file = f"{phonon_dir}/KPOINTS", f"{phonon_dir}/INCAR", f"{phonon_dir}/POTCAR"
 
     strain_args = {
@@ -80,13 +83,15 @@ def process_phonon(config):
             'delta': config['deform']['delta'],
             'Nsteps': config['deform']['Nsteps']}
 
+    suffix_list = _get_suffix_list(**strain_args)
 
     for suffix in tqdm(suffix_list, desc='processing phonon supercells'):
         contcar = read(f'{config["deform"]["save"]}/e-{suffix}/CONTCAR', format='vasp')
+        os.makedirs(f'{phonon_dir}/e-{suffix}', exist_ok=True)
 
         phonon = Phonopy(unitcell=aseatoms2phonoatoms(contcar),
                          supercell_matrix=config['phonon']['supercell'],
-                         primitive_matrix=config['phonon']['primitive'])
+                         primitive_matrix=config['phonon']['primitive'],)
 
         phonon.generate_displacements()
         phonon.save(f'{phonon_dir}/e-{suffix}/phonopy_disp.yaml')
