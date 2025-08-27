@@ -1,6 +1,7 @@
 !! Description
 
 python module for benchmarking the coefficient of thermal expansion (CTE) of mateirals calculated by MLIP(machine learning interatomic potential).
+
 Calculation settings follows phonopy and phono3py's setting (https://github.com/atztogo/phonondb) from the phonondb.
 
 !! Installation
@@ -23,4 +24,5 @@ There are two modules
 cte2-mlip and cte2-vasp, each coded to automize the same procedure for MLIP as an ASE calculator and VASP.
 
 The following proceudres (calc. FC2, harmonic properties, thermodynamic properties and qha) follow a series of common CLIs: cte2-fc2, cte2-harmonic, and cte2-qha
+
 
