@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 name = "cte2"
 version = "0.2.0"
 authors = [
-  { name = "Yujin Kang", email = "jinvk.to@gmail.com" },
+  { name = "Yujin(Will) Kang", email = "yjkang@snu.ac.kr" },
   ]
 description = "python package for calculating  the coefficient of thermal expansion with universal machine learning interatomic potentials"
 readme = "README.md"
