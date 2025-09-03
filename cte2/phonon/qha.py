@@ -1,0 +1,87 @@
+import os
+import os.path as osp
+from phonopy.api_qha import PhonopyQHA
+from phonopy.file_IO import read_thermal_properties_yaml, read_v_e
+from contextlib import redirect_stdout, redirect_stderr
+import numpy as np
+import ase.io as ase_IO
+import warnings
+
+from cte2.util.utils import _get_suffix_list
+from cte2.util.calc import single_point_calculate
+from cte2.util.io import DatToCsv
+
+def process_qha(config, calc):
+    # -------- preprocess --------- #
+    ratio_list = config['deform']['ratio']
+    conf = config['qha']
+    qha_dir = os.path.join(os.getcwd), config['qha']['save'])
+    qha_plot = f"{qha_dir}/{conf['plot']}"
+    qha_data = f"{qha_dir}/{conf['data']}"
+    qha_full = f"{qha_dir}/{conf['full']}"
+    primitive_factor = np.linalg.det(np.array(config['unitcell']['primitive']))
+
+    ev_filename = f"{conf}/{config['qha']['write']}"
+
+    filenames= []
+    ev_file = open(ev_filename, 'w', buffering = 1)
+
+    thin_number = config['qha']['thin_number']
+
+    for i, suffix in enumerate(suffix_list):
+        phonon_dir = f"{config['phonon']['save']}/e{i}"
+        deform_dir = f"{config['deform']['save']}/e{i}"
+
+        if osp.exists(f'{phonon_dir}/ERROR-IMAGINARY.txt'):
+             warnings.warn(f'WARNING: {i}th structure has IMAGINARY modes. Skipping ...')
+             continue
+
+        filenames.append(f'{phonon_dir}/thermal_properties.yaml')
+         atoms = single_point_calculate(atoms=ase_IO.read(f"{deform_dir}/CONTCAR",format='vasp'),calc=calc)
+
+        ev_file.write(f'{atoms.get_volume()*primitive_factor}{chr(9)}{atoms.get_potential_energy()*primitive_factor}\n')
+         
+    temperatures, cv, entropy, fe_phonon, _, _ = read_thermal_properties_yaml(filenames=filenames)
+    volumes, free_energies = read_v_e(filename=ev_filename)
+
+    qha_kwargs = {'volumes': volumes, 'electronic_energies': free_energies,
+                  'temperatures': temperatures, 'free_energy': fe_phonon,
+                  'cv': cv, 'entropy': entropy, 'eos': conf['eos'], 't_max': conf['t_max'],
+                  'verbose': True}
+
+    with open(f'{qha_dir}/qha.x', 'w') as f, redirect_stdout(f), redirect_stderr(f):
+        qha = PhonopyQHA(**qha_kwargs)
+   
+    os.chdir(qha_plot)
+    qha.plot_qha(thin_number=thin_number).savefig(f'{qha_dir}/qha_plot.png', dpi=600)
+    qha.plot_qha(thin_number=thin_number).savefig(f'{qha_full}/qha_plot.png', dpi=600)
+    qha.plot_pdf_helmholtz_volume(thin_number=thin_number)
+    qha.plot_pdf_volume_temperature()
+    qha.plot_pdf_thermal_expansion()
+    qha.plot_pdf_gibbs_temperature()
+    qha.plot_pdf_bulk_modulus_temperature()
+    qha.plot_pdf_heat_capacity_P_polyfit()
+    qha.plot_pdf_heat_capacity_P_numerical()
+    qha.plot_pdf_gruneisen_temperature()
+
+    os.chdir(qha_data)
+    qha.write_helmholtz_volume()
+    qha.write_helmholtz_volume_fitted(thin_number=thin_number)
+    qha.write_volume_temperature()
+    qha.write_thermal_expansion()
+    qha.write_gibbs_temperature()
+    qha.write_bulk_modulus_temperature()
+    qha.write_heat_capacity_P_numerical()
+    qha.write_heat_capacity_P_polyfit()
+    qha.write_gruneisen_temperature()
+
+    os.chdir(qha_full)
+    qha.write_helmholtz_volume_fitted(thin_number=config['phonon']['t_step'])
+    qha.plot_pdf_helmholtz_volume(thin_number=config['phonon']['t_step'])
+
+    os.chdir(qha_dir)
+    bulk_modulus = qha._bulk_modulus.plot().savefig(f'{qha_dir}/{conf["eos"]}.png', dpi=600)
+
+    inp_dat = f'{qha_data}/thermal_expansion.dat'
+    out_csv = f'{qha_dir}/thermal_expansion.csv'
+    DatToCsv(inp_dat, out_csv, columns='temperature,cte')

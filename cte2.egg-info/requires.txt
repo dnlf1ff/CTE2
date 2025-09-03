@@ -1,5 +1,0 @@
-sevenn
-numpy
-pymatgen
-ase
-spglib

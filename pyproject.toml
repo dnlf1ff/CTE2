@@ -8,13 +8,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cte2"
-version = "0.2.0"
+version = "1.0.0"
 authors = [
   { name = "Yujin(Will) Kang", email = "yjkang@snu.ac.kr" },
   ]
 description = "python package for calculating  the coefficient of thermal expansion with universal machine learning interatomic potentials"
 readme = "README.md"
 requires-python = ">=2.7"
+
 dependencies = [
     "sevenn",
     "numpy",
@@ -24,29 +25,14 @@ dependencies = [
     ]
 
 [project.scripts]
-cte2 = "cte2.scripts.cte2_run:main"
-cte2-run = "cte2.scripts.cte2_run:main"
-
-cte2-vasp = "cte2.scripts.cte2_vasp:main"
-cte2-mlip = "cte2.scripts.cte2_mlip:main"
-
-cte2-fc2 = "cte2.scripts.cte2_fc2:main"
-cte2-vasp-fc2 = "cte2.scripts.cte2_fc2:main"
-cte2-mlip-fc2 = "cte2.scripts.cte2_fc2:main"
-cte2-vasp-harmonic = "cte2.scripts.cte2_harmonic:main"
-cte2-mlip-harmonic = "cte2.scripts.cte2_harmonic:main"
-cte2-harmonic = "cte2.scripts.cte2_harmonic:main"
-cte2-vasp-qha = "cte2.scripts.cte2_qha:main"
-cte2-mlip-qha = "cte2.scripts.cte2_qha:main"
-cte2-qha = "cte2.scripts.cte2_qha:main"
+cte2 = "cte2.main:main"
+cte2-run = "cte2.main:main"
 
 [tool.setuptools]
 packages = [
     "cte2",
-    "cte2.cte",
-    "cte2.scripts",
-    "cte2.mlip",
-    "cte2.vasp",
+    "cte2.structure",
+    "cte2.phonon",
     "cte2.util",
 ]
 

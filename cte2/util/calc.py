@@ -7,38 +7,18 @@ from ase.calculators.singlepoint import SinglePointCalculator
 modified based on Jaesun Kim's code
 """
 
-def calc_from_py(config, script = 'calc_loader.py', module = 'load_calc'):
-    import importlib.util
-    from pathlib import Path
+def get_calc(config):
+    conf = config['calculator']
+    model = conf['model_path']
+    calc_type = conf['calc_type']
+    calc_args = conf['calc_args']
 
-    file_path = Path(__file__).resolve().parent / script
-    spec = importlib.util.spec_from_file_location(module, file_path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-
-    calc = module.load_calc(config)
-    return calc
-
-def calc_from_config(config):
-    calc_conf = config['calculator'].copy()
-    calc_type = calc_conf['calc_type'].lower()
-
-    if calc_type in ['sevennet-mf', '7net-mf']:
-        calc_kwargs = {'model': calc_conf['calc_args']['model'],
-                   'modal': calc_conf['calc_args']['modal'],
-                   'device': calc_conf['calc_args']['device']}
-        return SevenNetCalculator(**calc_kwargs)
-
-    elif calc_type in ['sevennet', '7net', 'sevenn']:
-        calc_kwargs = {'model': calc_conf['calc_args']['model'],
-                   'device': calc_conf['calc_args']['device']}
-        return SevenNetCalculator(**calc_kwargs)
+    print(f"[{calc_type}]")
+    print(f"[{calc_type}] potential path: {model_path}")
+    print(f"[{calc_type}] calc_kwrgs: {calc_args}")
     
-    elif calc_type in ['dft', 'vasp']:
-        return None
-
-    else:
-        return calc_from_py(config)
+    calc = SevenNetCalculator(model = model_path, **calc_args)
+    return calc
 
 
 def single_point_calculate(atoms, calc=None):
