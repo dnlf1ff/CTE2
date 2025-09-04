@@ -7,20 +7,18 @@ def check_data_config(config):
 
 def check_unitcell_config(config):
     conf = config['unitcell'].copy()
-    if (load := conf['load']) is not None:
+    if (load := conf['load']):
         assert os.path.exists(conf['save'])
     os.makedirs(conf['save'], exist_ok = True)
 
 def check_deform_config(config):
     conf = config['deform'].copy()
-    if (load := conf['load']) is not None:
+    if (load := conf['load']):
         assert os.path.exists(conf['save'])
     os.makedirs(conf['save'], exist_ok=True)
 
 def check_supercell_config(config):
     conf = config['supercell']
-    if (load := conf['load']) is not None:
-        assert os.path.exists(conf['save'])
     os.makedirs(conf['save'], exist_ok=True)
     assert isinstance(conf['distance'], float)
 
@@ -53,10 +51,6 @@ def update_config_dirs(config):
     for task in tasks:
         if (save_path := config[task].get('save')) is not None:
             config[task]['save'] = f"{cwd}/{save_path}"
-        if (load_path := config[task].get('load')) is not None:
-            config[task]['load'] = f"{cwd}/{load_path}"
-        if (load_path := config[task].get('load_opt')) is not None:
-            config[task]['load_opt'] = f"{cwd}/{load_path}"
     return config
 
 def check_calc_config(config):
