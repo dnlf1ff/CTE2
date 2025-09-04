@@ -5,18 +5,17 @@ import ase.io as ase_IO
 
 from phonopy import file_IO as ph_IO
 from phonopy import load as load_phonon
-from phonopy.api_phonopy import Phonopy
 
 from cte2.util.calc import single_point_calculate
 
 
-def calculate_fc2(phonon, phonon_dir, calc, symm_fc2 = True):
+def calculate_fc2(phonon, supercell_dir, calc, symm_fc2 = True):
     forces = []
     for idx in range(len(phonon.displacements)):
         label = str(idx+1).zfill(3)
-        atoms = ase_IO.read(f"{phonon_dir}/fc2-{label}/POSCAR", format='vasp')
+        atoms = ase_IO.read(f"{supercell_dir}/fc2-{label}/POSCAR", format='vasp')
         atoms = single_point_calculate(atoms, calc)
-        ase_IO.write(f"{phonon_dir}/fc2-{label}/CONTCAR", atoms, format='vasp')
+        ase_IO.write(f"{supercell_dir}/fc2-{label}/CONTCAR", atoms, format='vasp')
         forces.append(atoms.get_forces())
 
     force_set = np.array(forces)
@@ -33,7 +32,7 @@ def process_fc2(config, calc=None):
     save_dir = conf['save']
     symm_fc2 = conf['symm_fc2']
 
-    for i, suffix in enumerate(tqdm(suffix_list, desc='processing fc2')):
+    for i, ratio in enumerate(tqdm(ratio_list, desc='processing fc2')):
         supercell_dir = f"{config['supercell']['save']}/e{i}"
         phonon_dir = f"{save_dir}/e{i}"
         os.makedirs(phonon_dir, exist_ok = True)
@@ -45,17 +44,16 @@ def process_fc2(config, calc=None):
                 fc2 = ph_IO.parse_FORCE_CONSTANTS(fc2_file)
                 phonon.force_constants = fc2
             except:
-                print(f'WARNING: ERROR while parsing FC2 of the {i}th structure; will re-calculate')
-                phonon = calculate_fc2(phonon, phonon_dir, calc)
+                print(f'WARNING: ERROR while parsing FC2 of the {i}th structure(ratio: {ratio}); will re-calculate')
+                phonon = calculate_fc2(phonon, supercell_dir, calc)
 
             ph_IO.write_FORCE_CONSTANTS(phonon.force_constants, filename=fc2_file)
 
         else:
-            phonon = calculate_fc2(phonon, phonon_dir, calc)
+            phonon = calculate_fc2(phonon, supercell_dir, calc)
             ph_IO.write_FORCE_CONSTANTS(phonon.force_constants, filename=fc2_file)
 
         torch.cuda.empty_cache()
         gc.collect()
         phonon.save(f'{phonon_dir}/phonopy_params.yaml', compression='xz')
-
 

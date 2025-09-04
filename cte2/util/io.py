@@ -49,7 +49,7 @@ def DatToCsv(inp: Union[str, os.PathLike], out: Union[str, os.PathLike], columns
     dat_lines = inp_dat.readlines()
     if columns is not None:
         out.writelines(f'{columns}\n')
-    for line_number, dat_line in enumerate(dat_lines):
+    for _, dat_line in enumerate(dat_lines):
         if '#' in dat_line:
             continue
         try:

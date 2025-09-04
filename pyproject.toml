@@ -17,11 +17,9 @@ readme = "README.md"
 requires-python = ">=2.7"
 
 dependencies = [
-    "sevenn",
-    "numpy",
+    "phonopy",
     "pymatgen",
-    "ase",
-    "spglib"
+    "seekpath"
     ]
 
 [project.scripts]

@@ -1,4 +1,3 @@
-import numpy as np
 from tqdm import tqdm
 from sevenn.calculator import SevenNetCalculator
 from ase.calculators.singlepoint import SinglePointCalculator
@@ -9,7 +8,7 @@ modified based on Jaesun Kim's code
 
 def get_calc(config):
     conf = config['calculator']
-    model = conf['model_path']
+    model_path = conf['model_path']
     calc_type = conf['calc_type']
     calc_args = conf['calc_args']
 

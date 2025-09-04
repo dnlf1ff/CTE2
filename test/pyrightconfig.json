@@ -1,6 +1,0 @@
-{
-    "typeCheckingMode": "strict",
-    "diagnosticSeverityOverrides": {
-        "reportAttributeAccessIssue": "none"
-    }
-}

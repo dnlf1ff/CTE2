@@ -1,8 +1,7 @@
-from ase.constraints import FixSymmetry, FixAtoms
+from ase.constraints import FixSymmetry
 from ase.filters import UnitCellFilter, FrechetCellFilter
 from ase.optimize import LBFGS, FIRE, FIRE2
 import numpy as np
-from ase import Atoms
 
 OPT_DCT = {'fire': FIRE, 'fire2':FIRE2,'lbfgs': LBFGS}
 FILTER_DCT = {'frechet': FrechetCellFilter, 'unitcell': UnitCellFilter}
@@ -46,17 +45,20 @@ class AseAtomRelax:
 
     def relax_atoms(self, atoms):
         atoms = atoms.copy()
+        if self.fix_symm:
+            atoms.set_constraint(FixSymmetry(atoms, symprec=1e-05))
+
         atoms.calc = self.calc
         cell_filter = self.cell_filter(atoms, mask=self.mask)
         optimizer = self.optimizer(cell_filter, logfile=self.logfile)
-        conv = optimizer.run(fmax=self.fmax, steps=self.steps)
+        optimizer.run(fmax=self.fmax, steps=self.steps)
         return atoms
 
-def get_aar(config, calc, opt_type='unitcell', cell_filter=None, logfile='ase_relax.log'):
+def get_ase_relaxer(config, calc, opt_type='unitcell', cell_filter=None, logfile='ase_relax.log'):
     arr_args = config['opt'][opt_type].copy()
 
-    opt = OPT_DICT[arr_args['optimizer'].lower()]
-    cell_filter = FILTER_DICT[arr_args['cell_filter']]
+    opt = OPT_DCT[arr_args['optimizer'].lower()]
+    cell_filter = FILTER_DCT[arr_args['cell_filter']]
 
     arr_args['calc'] = calc
     arr_args['optimizer'] = opt

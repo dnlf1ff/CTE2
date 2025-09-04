@@ -1,9 +1,25 @@
 #!/bin/bash
+#SBATCH --job-name=pyright
+#SBATCH --output=pyright.x
+#SBATCH --error=pyright.x
+#SBATCH --nodes=1   
+#SBATCH --ntasks=1
+#SBATCH --time=1:00:00 
+#SBATCH --partition=gpu
 
-# module=$HOME/CTE2
-CWD=$(pwd)
+echo "SLURM_NTASKS: $SLURM_NTASKS"
 
-# pyright --outputjson > $CWD/debug/pyright.json
+source ~/.bash_profile
 
-cte2-qha --calc_type sevenn --config ./test-input/vasp_config.yaml --prefix Al-zero --potential_dirname /Users/dnjf/__archive__/MLIP --functional pbe52 --task all --model 7net-0.pth --modal mpa
+if [ -z "$SLURM_NTASKS" ] || [ "$SLURM_NTASKS" -le 0 ]; then
+	echo "Error: SLURM_NTASKS is not set or is less than or equal to 0"
+	exit 1
+fi
+
+source ~/.bashrc
+source $CTE_VENV/bin/activate
+
+cd ..
+pyright --outputjson > pyright.json
+
 

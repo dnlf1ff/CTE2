@@ -1,8 +1,5 @@
 import numpy as np
-import math
 import warnings
-import seekpath
-from ase.io import write
 
 import ase.io as ase_IO
 from ase import Atoms
@@ -11,9 +8,8 @@ from pymatgen.io.vasp import Vasprun
 from pymatgen.core import Structure, Lattice
 
 import spglib
-from phonopy import Phonopy
 from phonopy.structure.atoms import PhonopyAtoms
-from phonopy.interface.vasp import write_supercells_with_displacements
+# from phonopy.interface.vasp import write_supercells_with_displacements
 
 PRIMITIVE_MAP = {
         'a': [[1, 0, 0],[0, 0.5, -0.5],[0, 0.5, 0.5]],
@@ -94,7 +90,7 @@ def get_primitive_matrix(config):
 
     elif isinstance(primitive, list):
         assert np.array(primitive).shape == (3, 3), "Primitive matrix must be a 3x3 matrix."
-        return primitive.tolist()
+        return primitive
 
     else:
         return PRIMITIVE_MAP['p']  

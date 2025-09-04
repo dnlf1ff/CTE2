@@ -1,6 +1,7 @@
-import sys, yaml, gc
+import warnings, sys
+import yaml
 
-from cte2.util.config import parse_config
+from cte2.util.parser import parse_config
 from cte2.util.io import dumpYAML
 from cte2.util.calc import get_calc
 
@@ -12,25 +13,29 @@ from cte2.phonon.fc2 import process_fc2
 from cte2.phonon.harmonic import process_harmonic
 from cte2.phonon.qha import process_qha
 
+ 
+def main(config_dir=None):
+    if config_dir is None:
+        config_dir = sys.argv[1]
 
-def main(argv: list[str] | None=None) -> None:
     warnings.filterwarnings("ignore", category=DeprecationWarning, module="seekpath.hpkot")
-    args = parse_args(argv)
-    config_dir = args.config
 
     with open(config_dir, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
-    config = parse_config(config, argv)
-    dumpYAML(config, f'{config["data"]["cwd"]}/config_mlip.yaml')
+    config = parse_config(config)
+    dumpYAML(config, f'{config["data"]["cwd"]}/config_parsed.yaml')
 
-    calc = calc_from_config(config)
+    calc = get_calc(config)
 
-    process_input(config, calc)
+    if config['unitcell']['run']:
+        process_unitcell(config, calc)
         
-    process_deform(config, calc)
+    if config['deform']['run']:
+        process_deform(config, calc)
 
-    process_phonon(config)
+    if config['supercell']['run']:
+        process_supercell(config)
 
     process_fc2(config, calc)
 
@@ -39,4 +44,5 @@ def main(argv: list[str] | None=None) -> None:
     process_qha(config, calc)
 
 if __name__ == '__main__':
-    main()
+    config_dir = sys.argv[1]
+    main(config_dir)

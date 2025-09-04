@@ -1,10 +1,10 @@
-from cte2.util.relax import get_aar
 
-import numpy as np
 from tqdm import tqdm
-import warnings
 import ase.io as ase_IO
-import torch, gc
+import torch, gc, os
+
+from cte2.util.utils import get_spgnum, write_csv
+from cte2.util.relax import get_ase_relaxer
 
 def scale_unitcell(config):
     save_dir = config['deform']['save']
@@ -34,25 +34,25 @@ def process_deform(config, calc):
     csv_file = open(f"{save_dir}/deformed.csv", "w", buffering = 1)
     csv_file.write('idx,energy,volume,natom,a,b,c,alpha,beta,gamma,conv\n')
 
-    scale_poscar(config)
+    scale_unitcell(config)
 
-    for i, ratio in enumerate(tqdm(ratio_list), desc='Relaxing strained(deformed) unitcells')):
+    for i in tqdm(range(len(ratio_list)), desc='Relaxing strained(deformed) unitcells'):
         deform_dir = f"{save_dir}/e{i}"
 
-        aar = get_aar(config, calc, opt_type='deform', logfile=f"{deform_dir}/relax.log")
+        ase_relaxer = get_ase_relaxer(config, calc, opt_type='deform', logfile=f"{deform_dir}/relax.log")
         atoms = ase_IO.read(f"{deform_dir}/POSCAR")
         init_spg = get_spgnum(atoms)
-        atoms = aar.update_atoms(atoms)
+        atoms = ase_relaxer.update_atoms(atoms)
         write_csv(csv_file, atoms, idx=f'pre-{i}')
         
         if not config['deform']['load_opt']:
-            atoms = aar.relax_atoms(atoms)
-            atoms = aar.update_atoms(atoms)
+            atoms = ase_relaxer.relax_atoms(atoms)
+            atoms = ase_relaxer.update_atoms(atoms)
             spg_num = get_spgnum(atoms)
 
         else:
             atoms = ase_IO.read(f"{deform_dir}/CONTCAR")
-            atoms = aar.update_atoms(atoms)
+            atoms = ase_relaxer.update_atoms(atoms)
             spg_num = get_spgnum(atoms)
 
         write_csv(csv_file, atoms, idx=f'post-{i}')
@@ -66,7 +66,7 @@ def process_deform(config, calc):
             print(f'WARNING: {i}th deformed structure did not converged with in {step} steps!')
 
     csv_file.close()
-    del csv_file, aar
+    del csv_file
 
     torch.cuda.empty_cache()
     gc.collect()

@@ -1,5 +1,5 @@
 import os
-from cte.utils.
+from cte2.util.utils import get_primitive_matrix
 
 def check_data_config(config):
     config_data = config['data']
@@ -7,29 +7,27 @@ def check_data_config(config):
 
 def check_unitcell_config(config):
     conf = config['unitcell'].copy()
-    os.makedirs(conf['save'], exist_ok = True)
     if (load := conf['load']) is not None:
-        assert os.path.exists(load)
+        assert os.path.exists(conf['save'])
+    os.makedirs(conf['save'], exist_ok = True)
 
 def check_deform_config(config):
     conf = config['deform'].copy()
-    os.makedirs(conf['save'], exist_ok=True)
     if (load := conf['load']) is not None:
-        assert os.path.exists(load)
-    assert isinstance(conf['ratio'], list[float])
+        assert os.path.exists(conf['save'])
+    os.makedirs(conf['save'], exist_ok=True)
 
 def check_supercell_config(config):
     conf = config['supercell']
-    os.makedirs(conf['save'], exist_ok=True)
     if (load := conf['load']) is not None:
-        assert os.path.exists(load)
+        assert os.path.exists(conf['save'])
+    os.makedirs(conf['save'], exist_ok=True)
     assert isinstance(conf['distance'], float)
-    assert _islistinstance(conf['supercell_matrix'], [int])
 
 def check_phonon_config(config):
     conf = config['phonon']
     os.makedirs(conf['save'], exist_ok=True)
-    assert isinstance(conf['symmetrize'], bool)
+    assert isinstance(conf['symm_fc2'], bool)
     assert isinstance(conf['run_dos'], bool)
     assert isinstance(conf['run_band'], bool)
     assert isinstance(conf['t_min'], (int,float))
@@ -39,7 +37,7 @@ def check_phonon_config(config):
 
 def check_qha_config(config):
     conf = config['qha']
-    assert (eos := conf['eos']) in ['birch', 'vinet', 'birch_murnaghan']
+    assert conf['eos'] in ['birch', 'vinet', 'birch_murnaghan']
     assert ('sparse' in conf.keys() or 'thin_number' in conf.keys())
     if conf.get('save', None) is not None:
         os.makedirs(conf['save'], exist_ok = True)
@@ -49,6 +47,7 @@ def check_qha_config(config):
 
 def update_config_dirs(config):
     os.makedirs(cwd := config['data']['output'], exist_ok=True)
+    cwd = config['data']['cwd'] = os.path.abspath(cwd)
 
     tasks = ['unitcell', 'deform', 'supercell', 'phonon', 'qha']
     for task in tasks:
@@ -60,17 +59,23 @@ def update_config_dirs(config):
             config[task]['load_opt'] = f"{cwd}/{load_path}"
     return config
 
-def parse_config(config, argv: list[str] | None=None):
+def check_calc_config(config):
+    conf = config['calculator']
+    assert os.path.isfile(conf['model_path'])
+    # assert 'modal' in conf['calc_args'].keys() if conf['calc_type'] in omni
+
+def parse_config(config):
     config = update_config_dirs(config)
 
     check_data_config(config)
+    check_calc_config(config)
+
     check_unitcell_config(config)
     check_deform_config(config)
     check_supercell_config(config)
     check_phonon_config(config)
     check_qha_config(config)
 
-    config['unitcell']['primitive'] = get_primitive_matrix(config)
+    config['unitcell']['primitive_matrix'] = get_primitive_matrix(config)
 
-    config = check_calc_config(config)
     return config

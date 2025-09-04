@@ -1,9 +1,10 @@
 from __future__ import annotations
-import warnings
 from phonopy import load
 import phonopy.file_IO as ph_IO
 import os
 from tqdm import tqdm
+
+from cte2.util.utils import check_imaginary_freqs
 
 def process_harmonic(config):
     ratio_list = config['deform']['ratio']
@@ -12,7 +13,7 @@ def process_harmonic(config):
 
     for i, ratio in enumerate(tqdm(ratio_list, desc='calculating harmonic properties')):
         Im = False
-        phonon_dir = f"{save_dir}/e{i}"
+        h_dir = f"{save_dir}/e{i}"
 
         if os.path.isfile(f"{h_dir}/phonopy_params.yaml"):
             phonon = load(f"{h_dir}/phonopy_params.yaml")
