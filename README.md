@@ -1,4 +1,4 @@
-## Installation & Environment settings
+## Installation & Environmental settings
 
 ```
 # bash
