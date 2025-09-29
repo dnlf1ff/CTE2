@@ -21,7 +21,8 @@ class AseAtomRelax:
         fix_symm=True,
         fmax=0.00001,
         steps=10000,
-        logfile='ase_relaxer.log'
+        logfile='ase_relaxer.log',
+        constant_volume = False
     ):
         self.calc = calc
         self.optimizer = optimizer
@@ -31,6 +32,9 @@ class AseAtomRelax:
         self.fmax = fmax
         self.steps = steps
         self.logfile = logfile
+        if self.mask == [0, 0, 0, 0, 0, 0]:
+            constant_volume = True
+        self.constant_volume = constant_volume
 
     def update_atoms(self, atoms):
         atoms = atoms.copy()
@@ -62,7 +66,10 @@ class AseAtomRelax:
             atoms.set_constraint(FixSymmetry(atoms, symprec=1e-05))
 
         atoms.calc = self.calc
-        cell_filter = self.cell_filter(atoms, mask=self.mask)
+        if self.constant_volume:
+            cell_filter = self.cell_filter(atoms, constant_volume = self.constant_volume, mask=self.mask)
+        else:
+            cell_filter = self.cell_filter(atoms, mask=self.mask)
         optimizer = self.optimizer(cell_filter, logfile=self.logfile)
         optimizer.run(fmax=self.fmax, steps=self.steps)
         opt_steps = optimizer.get_number_of_steps()
@@ -79,7 +86,6 @@ def get_ase_relaxer(config, calc, opt_type='unitcell', cell_filter=None, logfile
 
     opt = OPT_DCT[arr_args['optimizer'].lower()]
     cell_filter = FILTER_DCT[arr_args['cell_filter']]
-    filter_args = arr_args.pop('filter_args')
 
     arr_args['calc'] = calc
     arr_args['optimizer'] = opt

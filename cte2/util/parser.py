@@ -75,7 +75,7 @@ def update_config_dirs(config):
     prefix = config['prefix']
     config['cwd'] = cwd = f"./{prefix}"
 
-    os.makedirs(cwd := config['data']['output'], exist_ok=True)
+    os.makedirs(cwd, exist_ok=True)
     cwd = config['data']['cwd'] = os.path.abspath(cwd)
 
     tasks = ['unitcell', 'deform', 'supercell', 'phonon', 'qha']
