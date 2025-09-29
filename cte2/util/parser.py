@@ -1,5 +1,33 @@
 import os
+import argparse
 from cte2.util.utils import get_primitive_matrix
+
+def parse_args(argv: list[str]| None=None):
+    parser = argparse.ArgumentParser(description= "cli tool")
+
+    parser.add_argument('--config', type=str, default='./config.yaml', 
+                        help='config yaml file directory')
+
+    parser.add_argument('--calc', type=str, default='SevenNet',
+                        help='ompa, mace, orb, esen, dpa, uma, omni')
+
+    parser.add_argument('--model', type=str, default='omni',
+                        help='omni, ompa, omat, zero')
+
+    parser.add_argument('--modal', type=str, default='omat24',
+                        help='mpa, omat24, matpes_pbe, mp_r2scan, matpes_r2scan')
+
+    return parser.parse_args(argv)
+
+def overwrite_default(config, argv: list[str] | None=None):
+    args = parse_args(argv)
+    config['calculator']['calc'] = args.calc.lower()
+    config['calculator']['model'] =args.model.lower()
+
+    config['prefix'] = f'{args.model.lower()}/{args.modal.lower()}'
+    config['calculator']['modal'] = args.modal.lower()
+
+    return config
 
 def check_data_config(config):
     config_data = config['data']
@@ -44,6 +72,9 @@ def check_qha_config(config):
         os.makedirs(f"{conf['save']}/{conf['full']}", exist_ok = True)
 
 def update_config_dirs(config):
+    prefix = config['prefix']
+    config['cwd'] = cwd = f"./{prefix}"
+
     os.makedirs(cwd := config['data']['output'], exist_ok=True)
     cwd = config['data']['cwd'] = os.path.abspath(cwd)
 
@@ -56,9 +87,10 @@ def update_config_dirs(config):
 def check_calc_config(config):
     conf = config['calculator']
     assert os.path.isfile(conf['model_path'])
-    # assert 'modal' in conf['calc_args'].keys() if conf['calc_type'] in omni
 
-def parse_config(config):
+def parse_config(config, argv: list[str] | None=None):
+    config = overwrite_default(config, argv)
+ 
     config = update_config_dirs(config)
 
     check_data_config(config)

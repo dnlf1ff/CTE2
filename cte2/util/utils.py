@@ -28,10 +28,10 @@ def write_csv(file, atoms, idx='pre', dlm=','):
         a,b,c = atoms.get_cell().copy().lengths()
         alpha, beta, gamma = atoms.get_cell().copy().angles()
         try:
-            conv = dct['conv']
+            conv = f"{dct['force_conv']}{dlm}{dct['opt_steps']}{dlm}{dct['opt_conv']}"
         except:
-            conv = '-'
-        vals = [idx,dct['e_fr_energy'],volume,len(atoms),a,b,c,alpha,beta,gamma,conv] 
+            conv = '#N/A{dlm}#N/A{dlm}#N/A'
+        vals = [idx,dct['init_sgn'],sgn,dct['e_fr_energy'],volume,len(atoms),a,b,c,alpha,beta,gamma,conv] 
         file.write(f"{dlm}".join(map(str, vals)) + '\n')
 
     elif isinstance(atoms, Vasprun):

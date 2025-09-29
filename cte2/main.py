@@ -1,7 +1,7 @@
 import warnings, sys
 import yaml
 
-from cte2.util.parser import parse_config
+from cte2.util.parser import parse_args, parse_config
 from cte2.util.io import dumpYAML
 from cte2.util.calc import get_calc
 
@@ -14,17 +14,18 @@ from cte2.phonon.harmonic import process_harmonic
 from cte2.phonon.qha import process_qha
 
  
-def main(config_dir=None):
-    if config_dir is None:
-        config_dir = sys.argv[1]
+def main(argv: list[str] | None=None) -> None:
+    args = parse_args(argv)
 
-    warnings.filterwarnings("ignore", category=DeprecationWarning, module="seekpath.hpkot")
+    # config.yaml file to read
+    config_dir = args.config 
 
     with open(config_dir, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
-
     config = parse_config(config)
     dumpYAML(config, f'{config["data"]["cwd"]}/config_parsed.yaml')
+
+    warnings.filterwarnings("ignore", category=DeprecationWarning, module="seekpath.hpkot")
 
     calc = get_calc(config)
 
@@ -44,5 +45,4 @@ def main(config_dir=None):
     process_qha(config, calc)
 
 if __name__ == '__main__':
-    config_dir = sys.argv[1]
-    main(config_dir)
+    main()

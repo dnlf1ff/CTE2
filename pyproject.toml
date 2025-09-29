@@ -8,13 +8,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cte2"
-version = "1.0.0"
+version = "1.1.0"
 authors = [
   { name = "Yujin(Will) Kang", email = "yjkang@snu.ac.kr" },
   ]
-description = "python package for calculating  the coefficient of thermal expansion with universal machine learning interatomic potentials"
+description = "python package for calculating  the coefficient of thermal expansion with universal machine learning interatomic potentials; enabled flashTP"
 readme = "README.md"
-requires-python = ">=2.7"
+requires-python = ">=3.10"
 
 dependencies = [
     "phonopy",

@@ -5,6 +5,7 @@ import torch, gc, os
 
 from cte2.util.utils import get_spgnum, write_csv
 from cte2.util.relax import get_ase_relaxer
+from cte2.util.io import dumpJSON
 
 def scale_unitcell(config):
     save_dir = config['deform']['save']
@@ -32,18 +33,29 @@ def process_deform(config, calc):
     ratio_list = config['deform']['ratio']
 
     csv_file = open(f"{save_dir}/deformed.csv", "w", buffering = 1)
-    csv_file.write('idx,energy,volume,natom,a,b,c,alpha,beta,gamma,conv\n')
+    csv_file.write('idx,ratio,init_sgn,sgn,energy,volume,natom,a,b,c,alpha,beta,gamma,force_conv,steps,opt_conv\n')
 
     scale_unitcell(config)
+    
+    deform_dct = {}
 
-    for i in tqdm(range(len(ratio_list)), desc='Relaxing strained(deformed) unitcells'):
+    for i, ratio in tqdm(enumerate(ratio_list), desc='Relaxing strained(deformed) unitcells'):
         deform_dir = f"{save_dir}/e{i}"
+        deform_dct[i] = {'pre': {}, 'post': {}}
 
         ase_relaxer = get_ase_relaxer(config, calc, opt_type='deform', logfile=f"{deform_dir}/relax.log")
         atoms = ase_IO.read(f"{deform_dir}/POSCAR")
         init_spg = get_spgnum(atoms)
         atoms = ase_relaxer.update_atoms(atoms)
+        atoms.info['init_sgn'] = init_spg
+        atoms.info['task'] = 'unitcell optimization'
+        atoms.info['ratio'] = ratio
+        atoms.info['strain'] = float(ratio)-1
+        atoms.info['index'] = i 
+        atoms.info['sgn'] = '#N/A'
+        atoms.info['opt'] = 'pre'
         write_csv(csv_file, atoms, idx=f'pre-{i}')
+        deform_dct[i]['pre'].update(atoms.info.copy())
         
         if not config['deform']['load_opt']:
             atoms = ase_relaxer.relax_atoms(atoms)
@@ -55,19 +67,21 @@ def process_deform(config, calc):
             atoms = ase_relaxer.update_atoms(atoms)
             spg_num = get_spgnum(atoms)
 
+        atoms.info['sgn'] = spg_num
+        deform_dct[i]['post'].update(atoms.info.copy())
         write_csv(csv_file, atoms, idx=f'post-{i}')
         ase_IO.write(f"{deform_dir}/CONTCAR", atoms, format='vasp')
 
         if not (init_spg == spg_num):
             print('WARNING: space group number changed while relaxing {i}th deformed structure {init_spg} > {spg_num}')
 
-        if not atoms.info["conv"]:
+        if not atoms.info["opt_conv"]:
             step = config['opt']['deform']['steps']
             print(f'WARNING: {i}th deformed structure did not converged with in {step} steps!')
 
     csv_file.close()
     del csv_file
+    dumpJSON(deform_dct, filename=f'{save_dir}/deform_opt.json')
 
     torch.cuda.empty_cache()
     gc.collect()
-

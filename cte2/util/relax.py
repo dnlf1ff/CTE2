@@ -39,8 +39,21 @@ class AseAtomRelax:
         atoms.info['e_fr_energy'] = atoms.get_potential_energy(force_consistent=True)
         atoms.info['e_0_energy'] = atoms.get_potential_energy()
         atoms.info['force'] = atoms.get_forces()
-        conv = check_atoms_conv(atoms.get_forces())
-        atoms.info['conv'] = conv
+        atoms.info['position'] = atoms.get_positions()
+        atoms.info['formula'] = atoms.get_chemical_formula(empirical=True)
+        atoms.info['symbol'] = atoms.get_chemical_symbols()
+        atoms.info['stress'] = atoms.get_forces(voigt=False)
+        atoms.info['stress_voigt'] = atoms.get_forces()
+        atoms.info['volume'] = atoms.get_volume()
+        atoms.info['a'] = atoms.cell.lengths()[0]
+        atoms.info['b'] = atoms.cell.lengths()[1]
+        atoms.info['c'] = atoms.cell.lengths()[2]
+        atoms.info['alpha'] = atoms.cell.angles()[0]
+        atoms.info['beta'] = atoms.cell.angles()[1]
+        atoms.info['gamma'] = atoms.cell.angles()[2]
+
+        force_conv = check_atoms_conv(atoms.get_forces())
+        atoms.info['force_conv'] = force_conv
         return atoms
 
     def relax_atoms(self, atoms):
@@ -52,6 +65,13 @@ class AseAtomRelax:
         cell_filter = self.cell_filter(atoms, mask=self.mask)
         optimizer = self.optimizer(cell_filter, logfile=self.logfile)
         optimizer.run(fmax=self.fmax, steps=self.steps)
+        opt_steps = optimizer.get_number_of_steps()
+        atoms.info['opt_steps'] = opt_steps
+        opt_fin = True
+        if opt_steps >= self.steps:
+            opt_fin = False
+        atoms.info['opt_conv'] = opt_fin
+        atoms.info['opt'] = 'post'
         return atoms
 
 def get_ase_relaxer(config, calc, opt_type='unitcell', cell_filter=None, logfile='ase_relax.log'):
@@ -59,11 +79,13 @@ def get_ase_relaxer(config, calc, opt_type='unitcell', cell_filter=None, logfile
 
     opt = OPT_DCT[arr_args['optimizer'].lower()]
     cell_filter = FILTER_DCT[arr_args['cell_filter']]
+    filter_args = arr_args.pop('filter_args')
 
     arr_args['calc'] = calc
     arr_args['optimizer'] = opt
     arr_args['cell_filter'] = cell_filter
     arr_args['logfile'] = logfile
+
     return AseAtomRelax(**arr_args)
 
 def check_atoms_conv(forces: np.ndarray) -> bool:

@@ -1,6 +1,10 @@
-import yaml
+import json, yaml
 import os
 from typing import Any, Optional, Union
+
+def dumpJSON(data, filename, indent=4, sort_keys=False):
+    with open(filename, 'w') as fp:
+        json.dump(data, fp, indent=indent, sort_keys = sort_keys, ensure_ascii=False)
 
 def dict_representer(dumper, data=None):
     return dumper.represent_mapping(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data, flow_style=False)
