@@ -41,7 +41,7 @@ def process_deform(config, calc):
 
     for i, ratio in tqdm(enumerate(ratio_list), desc='Relaxing strained(deformed) unitcells'):
         deform_dir = f"{save_dir}/e{i}"
-        deform_dct[i] = {'pre': {}, 'post': {}, 'post-re': {}}
+        deform_dct[i] = {'pre': {}, 'post': {}, 'post_re': {}}
 
         ase_relaxer = get_ase_relaxer(config, calc, opt_type='deform', logfile=f"{deform_dir}/relax.log")
         atoms = ase_IO.read(f"{deform_dir}/POSCAR")

@@ -38,11 +38,14 @@ def main(argv: list[str] | None=None) -> None:
     if config['supercell']['run']:
         process_supercell(config)
 
-    process_fc2(config, calc)
+    if config['phonon']['run_fc2']:
+        process_fc2(config, calc)
 
-    process_harmonic(config)
+    if config['phonon']['run_harmonic']:
+        process_harmonic(config)
 
-    process_qha(config, calc)
+    if config['qha']['run']:
+        process_qha(config, calc)
 
 if __name__ == '__main__':
     main()

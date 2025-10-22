@@ -13,7 +13,7 @@ def process_unitcell(config, calc):
     save_dir = config['unitcell']['save']
     logfile = f'{save_dir}/unitcell.log' 
 
-    atoms_dct = {'pre': {}, 'post':{}, 'post-re': {}}
+    atoms_dct = {'pre': {}, 'post':{}, 'post_re': {}}
     csv_file = open(f"{save_dir}/unitcell_relaxation.csv", "w", buffering = 1)
     csv_file.write('idx,ratio,init_sgn,sgn,energy,volume,natom,a,b,c,alpha,beta,gamma,force_conv,steps,conv\n')
 
