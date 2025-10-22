@@ -4,10 +4,12 @@ import gc
 
 from cte2.util.relax import get_ase_relaxer
 from cte2.util.utils import get_spgnum, write_csv
-from cte2.util.io import dumpJSON
+from cte2.util.io import dumpPKL
+import sys
 
 def process_unitcell(config, calc):
     print('optimizing input atoms\n')
+    atoms_list = []
     save_dir = config['unitcell']['save']
     logfile = f'{save_dir}/unitcell.log' 
 
@@ -28,24 +30,46 @@ def process_unitcell(config, calc):
     atoms.info['opt_steps'] = '#N/A'
     atoms.info['force_conv'] = '#N/A'
     atoms = ase_atom_relaxer.update_atoms(atoms)
+
     write_csv(csv_file, atoms)
     atoms_dct['pre'].update(atoms.info.copy())
+    atoms.calc = None
+    atoms_list.append(atoms)
+
     if not config['unitcell']['load']:
         atoms = ase_relaxer.relax_atoms(atoms)
         atoms = ase_atom_relaxer.update_atoms(atoms)
-        atoms.calc = None
-        spg_num = get_spgnum(atoms)
+
+        if atoms.info['opt_conv']:
+            atoms_dct['post'].update(atoms.info.copy())
+            spg_num = get_spgnum(atoms)
+            write_csv(csv_file, atoms, idx='post-re')
+            atoms_list.append(atoms)
+
+        else:
+            atoms = ase_relaxer.redo(atoms)
+            spg_num = get_spgnum(atoms)
+            atoms_dct['post-re'].update(atoms.info.copy())
+            write_csv(csv_file, atoms, idx='post')
+            atoms.calc = None
+            atoms_list.append(atoms)
+            if not atoms.info['opt_conv']:
+                print('WARNING: failed structural relaxation. aborting program')
+                sys.exit()
         ase_IO.write(f"{save_dir}/CONTCAR", atoms, format='vasp')
 
     else:
         atoms = ase_IO.read(config["unitcell"]["load"], format='vasp')
         spg_num = get_spgnum(atoms)
         atoms.info['sgn'] = spg_num
+        atoms_dct['post-loaded'].update(atoms.info.copy())
+        write_csv(csv_file, atoms, idx='post')
+        atoms.calc = None
+        atoms_list.append(atoms)
 
-    atoms_dct['post'].update(atoms.info.copy())
-    write_csv(csv_file, atoms, idx='post')
-
-    # dumpJSON(atoms_dct, filename=f'{save_dir}/unitcell_opt.json')
+    dumpPKL(atoms_dct, filename=f'{save_dir}/unitcell_dct.pkl')
+    ase_IO.write(f'{save_dir}/unitcell_opt.extxyz', atoms_list, format='extxyz')
+    
 
     if not (init_spg == spg_num):
         print('WARNING: space group number changed while relaxing unitcell {init_spg} > {spg_num}')
