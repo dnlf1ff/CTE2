@@ -24,10 +24,14 @@ def process_unitcell(config, calc):
     atoms.info['ratio'] = '#N/A'
     atoms.info['sgn'] = '#N/A'
     atoms.info['opt'] = 'pre'
+    atoms.info['opt_conv'] = '#N/A'
+    atoms.info['opt_steps'] = '#N/A'
+    atoms.info['force_conv'] = '#N/A'
     atoms = ase_atom_relaxer.update_atoms(atoms)
     write_csv(csv_file, atoms)
     atoms_dct['pre'].update(atoms.info.copy())
     if not config['unitcell']['load']:
+        atoms = ase_relaxer.relax_atoms(atoms)
         atoms = ase_atom_relaxer.update_atoms(atoms)
         atoms.calc = None
         spg_num = get_spgnum(atoms)
@@ -41,7 +45,7 @@ def process_unitcell(config, calc):
     atoms_dct['post'].update(atoms.info.copy())
     write_csv(csv_file, atoms, idx='post')
 
-    dumpJSON(atoms_dct, filename=f'{save_dir}/unitcell_opt.json')
+    # dumpJSON(atoms_dct, filename=f'{save_dir}/unitcell_opt.json')
 
     if not (init_spg == spg_num):
         print('WARNING: space group number changed while relaxing unitcell {init_spg} > {spg_num}')

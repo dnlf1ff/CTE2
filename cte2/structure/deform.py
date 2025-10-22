@@ -54,6 +54,10 @@ def process_deform(config, calc):
         atoms.info['index'] = i 
         atoms.info['sgn'] = '#N/A'
         atoms.info['opt'] = 'pre'
+        atoms.info['opt_conv'] = '#N/A'
+        atoms.info['opt_steps'] = '#N/A'
+        atoms.info['force_conv'] = '#N/A'
+
         write_csv(csv_file, atoms, idx=f'pre-{i}')
         deform_dct[i]['pre'].update(atoms.info.copy())
         
@@ -81,7 +85,7 @@ def process_deform(config, calc):
 
     csv_file.close()
     del csv_file
-    dumpJSON(deform_dct, filename=f'{save_dir}/deform_opt.json')
+    # dumpJSON(deform_dct, filename=f'{save_dir}/deform_opt.json')
 
     torch.cuda.empty_cache()
     gc.collect()
