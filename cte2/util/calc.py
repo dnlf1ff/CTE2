@@ -11,7 +11,7 @@ def get_calc(config):
     conf = config['calculator']
     model_path = conf['model_path']
     calc_type = conf['calc_type'].lower()
-    calc_args = conf.get(['calc_args'], {})
+    calc_args = conf.get('calc_args', {})
 
     print('\n*************************************')
     print(f'calc type: {conf["calc_type"].upper()}')
