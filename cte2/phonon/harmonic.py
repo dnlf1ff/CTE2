@@ -34,7 +34,7 @@ def process_harmonic(config):
 
         if check_imaginary_freqs(frequencies):
             with open(f'{h_dir}/ERROR-IMAGINARY.txt', 'w') as f:
-                f.write('Imaginary mode detected during {i}th mesh calculation..\n')
+                f.write(f'Imaginary mode detected during {i}th mesh calculation..\n')
                 f.close()
             print(f'WARNING: Imaginary mode detected in {i}th deformed structure..')
             Im = True

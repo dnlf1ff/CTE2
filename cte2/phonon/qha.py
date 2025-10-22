@@ -5,7 +5,6 @@ from phonopy.file_IO import read_thermal_properties_yaml, read_v_e
 from contextlib import redirect_stdout, redirect_stderr
 import numpy as np
 import ase.io as ase_IO
-import warnings
 
 from cte2.util.calc import single_point_calculate
 from cte2.util.io import DatToCsv
@@ -32,7 +31,7 @@ def process_qha(config, calc):
         deform_dir = f"{config['deform']['save']}/e{i}"
 
         if osp.exists(f'{phonon_dir}/ERROR-IMAGINARY.txt'):
-             warnings.warn(f'WARNING: {i}th structure has IMAGINARY modes. Skipping ...')
+             print(f'WARNING: {i}th structure has IMAGINARY modes. Skipping ...')
              continue
 
         filenames.append(f'{phonon_dir}/thermal_properties.yaml')
@@ -55,15 +54,20 @@ def process_qha(config, calc):
     # plot everything at once
     print('plotting qha results')
     os.chdir(qha_plot)
-    qha.plot_qha(thin_number=thin_number).savefig(f'{qha_dir}/qha_plot.png', dpi=600)
-    qha.plot_qha(thin_number=thin_number).savefig(f'{qha_full}/qha_plot.png', dpi=600)
+    qha.plot_qha(thin_number=thin_number).savefig(f'{qha_dir}/qha_plot.png', dpi=300)
+    qha.plot_qha(thin_number=thin_number).savefig(f'{qha_full}/qha_plot.png', dpi=300)
     qha.plot_pdf_helmholtz_volume(thin_number=thin_number)
     qha.plot_pdf_volume_temperature()
     qha.plot_pdf_thermal_expansion()
     qha.plot_pdf_gibbs_temperature()
     qha.plot_pdf_bulk_modulus_temperature()
-    qha.plot_pdf_heat_capacity_P_polyfit()
-    qha.plot_pdf_heat_capacity_P_numerical()
+
+    try:
+        qha.plot_pdf_heat_capacity_P_polyfit()
+        qha.plot_pdf_heat_capacity_P_numerical()
+    except Exception as exc:
+        print(exc)
+
     qha.plot_pdf_gruneisen_temperature()
 
     # save dat files at once
@@ -75,8 +79,13 @@ def process_qha(config, calc):
     qha.write_thermal_expansion()
     qha.write_gibbs_temperature()
     qha.write_bulk_modulus_temperature()
-    qha.write_heat_capacity_P_numerical()
-    qha.write_heat_capacity_P_polyfit()
+
+    try:
+        qha.write_heat_capacity_P_numerical()
+        qha.write_heat_capacity_P_polyfit()
+    except Exception as exc:
+        print(exc)
+
     qha.write_gruneisen_temperature()
 
     # thin_numbers were set for readability, plot entire data
@@ -86,7 +95,7 @@ def process_qha(config, calc):
 
     os.chdir(qha_dir)
     # plot eos
-    qha._bulk_modulus.plot().savefig(f'{qha_dir}/{conf["eos"]}.png', dpi=600)
+    qha._bulk_modulus.plot().savefig(f'{qha_dir}/{conf["eos"]}.png', dpi=300)
 
     inp_dat = f'{qha_data}/thermal_expansion.dat'
     out_csv = f'{qha_dir}/thermal_expansion.csv'
