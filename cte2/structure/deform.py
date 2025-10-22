@@ -41,7 +41,7 @@ def process_deform(config, calc):
 
     for i, ratio in tqdm(enumerate(ratio_list), desc='Relaxing strained(deformed) unitcells'):
         deform_dir = f"{save_dir}/e{i}"
-        deform_dct[i] = {'pre': {}, 'post': {}}
+        deform_dct[i] = {'pre': {}, 'post': {}, 'post-re': {}}
 
         ase_relaxer = get_ase_relaxer(config, calc, opt_type='deform', logfile=f"{deform_dir}/relax.log")
         atoms = ase_IO.read(f"{deform_dir}/POSCAR")
@@ -66,8 +66,9 @@ def process_deform(config, calc):
             spg_num = get_spgnum(atoms)
 
             if atoms.info['opt_conv']:
-                deform_dct[i]['post'].update(atoms.info.copy())
                 spg_num = get_spgnum(atoms)
+                atoms.info['sgn'] = spg_num
+                deform_dct[i]['post'].update(atoms.info.copy())
                 write_csv(csv_file, atoms, idx=f'post-{i}')
                 atoms.calc = None
                 ase_IO.write(f"{deform_dir}/CONTCAR", atoms, format='vasp')
@@ -76,6 +77,7 @@ def process_deform(config, calc):
             else:
                 atoms = ase_relaxer.redo(atoms)
                 spg_num = get_spgnum(atoms)
+                atoms.info['sgn'] = spg_num
                 deform_dct[i]['post_re'].update(atoms.info.copy())
                 write_csv(csv_file, atoms, idx='post-{i}_re')
                 atoms.calc = None

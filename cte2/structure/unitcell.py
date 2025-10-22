@@ -13,7 +13,7 @@ def process_unitcell(config, calc):
     save_dir = config['unitcell']['save']
     logfile = f'{save_dir}/unitcell.log' 
 
-    atoms_dct = {'pre': {}, 'post':{}}
+    atoms_dct = {'pre': {}, 'post':{}, 'post-re': {}}
     csv_file = open(f"{save_dir}/unitcell_relaxation.csv", "w", buffering = 1)
     csv_file.write('idx,ratio,init_sgn,sgn,energy,volume,natom,a,b,c,alpha,beta,gamma,force_conv,steps,conv\n')
 
@@ -41,8 +41,9 @@ def process_unitcell(config, calc):
         atoms = ase_relaxer.update_atoms(atoms)
 
         if atoms.info['opt_conv']:
-            atoms_dct['post'].update(atoms.info.copy())
             spg_num = get_spgnum(atoms)
+            atoms.info['sgn'] = spg_num
+            atoms_dct['post'].update(atoms.info.copy())
             write_csv(csv_file, atoms, idx='post')
             atoms.calc = None
             atoms_list.append(atoms)
@@ -50,6 +51,7 @@ def process_unitcell(config, calc):
         else:
             atoms = ase_relaxer.redo(atoms)
             spg_num = get_spgnum(atoms)
+            atoms.info['sgn'] = spg_num
             atoms_dct['post_re'].update(atoms.info.copy())
             write_csv(csv_file, atoms, idx='post_re')
             atoms.calc = None
