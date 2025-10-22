@@ -1,4 +1,5 @@
 from tqdm import tqdm
+from ase.build import bulk
 from sevenn.calculator import SevenNetCalculator
 from ase.calculators.singlepoint import SinglePointCalculator
 
@@ -9,16 +10,28 @@ modified based on Jaesun Kim's code
 def get_calc(config):
     conf = config['calculator']
     model_path = conf['model_path']
-    calc_type = conf['calc_type']
-    calc_args = conf['calc_args']
+    calc_type = conf['calc_type'].lower()
+    calc_args = conf.get(['calc_args'], {})
 
-    print(f"[{calc_type}]")
-    print(f"[{calc_type}] potential path: {model_path}")
-    print(f"[{calc_type}] calc_kwrgs: {calc_args}")
-    
-    calc = SevenNetCalculator(model = model_path, **calc_args)
+    print('\n*************************************')
+    print(f'calc type: {conf["calc_type"].upper()}')
+    print(f'calc: {conf["calc"].upper()}')
+    print(f'modal: {calc_args["modal"]}')
+    print('*************************************\n')
+
+    calc = SevenNetCalculator(model=conf['path'], **calc_args)
+
+    try:
+        atoms = bulk('Si')
+        atoms.calc = calc
+        atoms.get_potential_energy(force_consistent=True)
+        print('SevenNetCalculator successfully initiated')
+
+    except:
+        calc_args['enable_flash'] = not calc_args['enable_flash']
+        calc = SevenNetCalculator(model=conf['path'], **calc_args)
+        print('SevenNetCalculator successfully initiated')
     return calc
-
 
 def single_point_calculate(atoms, calc=None):
     if calc is not None:
