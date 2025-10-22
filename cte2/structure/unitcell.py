@@ -17,7 +17,7 @@ def process_unitcell(config, calc):
     csv_file = open(f"{save_dir}/unitcell_relaxation.csv", "w", buffering = 1)
     csv_file.write('idx,ratio,init_sgn,sgn,energy,volume,natom,a,b,c,alpha,beta,gamma,force_conv,steps,conv\n')
 
-    ase_atom_relaxer = get_ase_relaxer(config, calc, opt_type='unitcell', logfile=logfile)
+    ase_relaxer = get_ase_relaxer(config, calc, opt_type='unitcell', logfile=logfile)
     atoms = ase_IO.read(config['data']['input'], **config['data']['load_args'])
 
     init_spg = get_spgnum(atoms)
