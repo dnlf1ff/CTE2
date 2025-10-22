@@ -21,7 +21,8 @@ def parse_args(argv: list[str]| None=None):
 
 def overwrite_default(config, argv: list[str] | None=None):
     args = parse_args(argv)
-    config['calculator']['calc'] = args.calc.lower()
+    config['calculator']['family'] = args.calc.lower()
+    config['calculator']['model'] = args.model.lower()
     config['calculator']['modal'] =args.modal.lower()
 
     config['prefix'] = f'{args.model.lower()}/{args.modal.lower()}'
