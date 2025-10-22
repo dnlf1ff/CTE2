@@ -65,7 +65,7 @@ def process_deform(config, calc):
             spg_num = get_spgnum(atoms)
 
             if atoms.info['opt_conv']:
-                deform_dct['post'].update(atoms.info.copy())
+                deform_dct[i]['post'].update(atoms.info.copy())
                 spg_num = get_spgnum(atoms)
                 write_csv(csv_file, atoms, idx=f'post-{i}')
                 atoms.calc = None
@@ -75,7 +75,7 @@ def process_deform(config, calc):
             else:
                 atoms = ase_relaxer.redo(atoms)
                 spg_num = get_spgnum(atoms)
-                deform_dct['post_re'].update(atoms.info.copy())
+                deform_dct[i]['post_re'].update(atoms.info.copy())
                 write_csv(csv_file, atoms, idx='post-{i}_re')
                 atoms.calc = None
                 atoms_list.append(atoms)

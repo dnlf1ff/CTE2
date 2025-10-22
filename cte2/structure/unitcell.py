@@ -29,7 +29,7 @@ def process_unitcell(config, calc):
     atoms.info['opt_conv'] = '#N/A'
     atoms.info['opt_steps'] = '#N/A'
     atoms.info['force_conv'] = '#N/A'
-    atoms = ase_atom_relaxer.update_atoms(atoms)
+    atoms = ase_relaxer.update_atoms(atoms)
 
     write_csv(csv_file, atoms)
     atoms_dct['pre'].update(atoms.info.copy())
@@ -38,7 +38,7 @@ def process_unitcell(config, calc):
 
     if not config['unitcell']['load']:
         atoms = ase_relaxer.relax_atoms(atoms)
-        atoms = ase_atom_relaxer.update_atoms(atoms)
+        atoms = ase_relaxer.update_atoms(atoms)
 
         if atoms.info['opt_conv']:
             atoms_dct['post'].update(atoms.info.copy())
