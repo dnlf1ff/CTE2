@@ -9,14 +9,13 @@ modified based on Jaesun Kim's code
 
 def get_calc(config):
     conf = config['calculator']
-    model_path = conf['model_path']
-    calc_type = conf['calc_type'].lower()
     calc_args = conf.get('calc_args', {})
 
     print('\n*************************************')
     print(f'calc type: {conf["calc_type"].upper()}')
     print(f'calc: {conf["calc"].upper()}')
     print(f'modal: {calc_args["modal"]}')
+    print(f'path: {conf["path"]}')
     print('*************************************\n')
 
     calc = SevenNetCalculator(model=conf['path'], **calc_args)
