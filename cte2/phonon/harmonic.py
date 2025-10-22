@@ -42,13 +42,25 @@ def process_harmonic(config):
         if Im:
             continue
 
-        try:
-            ph_IO.read_thermal_properties_yaml(filenames=[f"{h_dir}/thermal_properties.yaml"])
+        if conf['load_thermal']:
+            try:
+                ph_IO.read_thermal_properties_yaml(filenames=[f"{h_dir}/thermal_properties.yaml"])
 
-        except:
-            print(f"Error while parsing thermal properties of {i}th structure")
-            print(f"Will calculate the thermal properties again")
+            except:
+                print(f"Error while parsing thermal properties of {i}th structure")
+                print(f"Will run the thermal properties again")
 
+                phonon.run_thermal_properties(t_min = conf['t_min'],
+                                          t_max=conf['t_max'],
+                                          t_step=conf['t_step'])
+
+                phonon.write_yaml_thermal_properties(f'{h_dir}/thermal_properties.yaml')
+                thermal_plt = phonon.plot_thermal_properties()
+                thermal_plt.savefig(f'{h_dir}/thermal_properties.png', dpi=300)
+                thermal_plt.close()
+
+        else:
+            print(f"Running thermal properties for {i}th sturcture")
             phonon.run_thermal_properties(t_min = conf['t_min'],
                                       t_max=conf['t_max'],
                                       t_step=conf['t_step'])

@@ -39,7 +39,7 @@ def process_fc2(config, calc=None):
         fc2_file = f"{phonon_dir}/FORCE_CONSTANTS_2ND"
         phonon = load_phonon(f"{supercell_dir}/phonopy_disp.yaml")
 
-        if os.path.isfile(fc2_file):
+        if conf['load_fc2']:
             try:
                 fc2 = ph_IO.parse_FORCE_CONSTANTS(fc2_file)
                 phonon.force_constants = fc2
