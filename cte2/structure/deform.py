@@ -57,6 +57,7 @@ def process_deform(config, calc):
         atoms.info['opt_conv'] = '#N/A'
         atoms.info['opt_steps'] = '#N/A'
         atoms.info['force_conv'] = '#N/A'
+        atoms.calc = None
         atoms_list.append(atoms)
 
         if not config['deform']['load_opt']:
