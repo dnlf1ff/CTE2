@@ -22,7 +22,6 @@ def parse_args(argv: list[str]| None=None):
 def overwrite_default(config, argv: list[str] | None=None):
     args = parse_args(argv)
     config['calculator']['calc'] = args.calc.lower()
-    config['calculator']['model'] =args.model.lower()
     config['calculator']['modal'] =args.modal.lower()
 
     config['prefix'] = f'{args.model.lower()}/{args.modal.lower()}'
@@ -56,12 +55,13 @@ def check_phonon_config(config):
     conf = config['phonon']
     os.makedirs(conf['save'], exist_ok=True)
     assert isinstance(conf['symm_fc2'], bool)
+    assert isinstance(conf['load_fc2'], bool)
+    assert isinstance(conf['load_thermal'], bool)
     assert isinstance(conf['run_dos'], bool)
     assert isinstance(conf['run_band'], bool)
     assert isinstance(conf['t_min'], (int,float))
     assert isinstance(conf['t_max'], (int,float))
     assert isinstance(conf['t_step'], (int,float))
-
 
 def check_qha_config(config):
     conf = config['qha']
