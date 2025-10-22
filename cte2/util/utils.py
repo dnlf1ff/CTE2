@@ -31,7 +31,7 @@ def write_csv(file, atoms, idx='pre', dlm=','):
             conv = f"{dct['force_conv']}{dlm}{dct['opt_steps']}{dlm}{dct['opt_conv']}"
         except:
             conv = '#N/A{dlm}#N/A{dlm}#N/A'
-        vals = [idx,dct['init_sgn'],sgn,dct['e_fr_energy'],volume,len(atoms),a,b,c,alpha,beta,gamma,conv] 
+        vals = [idx,dct['init_sgn'],dct['sgn'],dct['e_fr_energy'],volume,len(atoms),a,b,c,alpha,beta,gamma,conv] 
         file.write(f"{dlm}".join(map(str, vals)) + '\n')
 
     elif isinstance(atoms, Vasprun):

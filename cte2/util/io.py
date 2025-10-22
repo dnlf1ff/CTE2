@@ -1,4 +1,4 @@
-import json, yaml
+import json, yaml, pickle
 import os
 from typing import Any, Optional, Union
 
@@ -6,8 +6,19 @@ def dumpJSON(data, filename, indent=4, sort_keys=False):
     with open(filename, 'w') as fp:
         json.dump(data, fp, indent=indent, sort_keys = sort_keys, ensure_ascii=False)
 
+def dumpPKL(data, filename):
+    with open(filename, 'wb') as f:
+        pickle.dump(data, f)
+
+def loadPKL(path):
+    with open(path, 'rb') as f:
+        data=pickle.load(f)
+    return data
+
+
 def dict_representer(dumper, data=None):
     return dumper.represent_mapping(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data, flow_style=False)
+
 def list_representer(dumper, data=None):
     return dumper.represent_sequence(yaml.resolver.BaseResolver.DEFAULT_SEQUENCE_TAG, data, flow_style=True)
 

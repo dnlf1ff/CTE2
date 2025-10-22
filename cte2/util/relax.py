@@ -19,8 +19,8 @@ class AseAtomRelax:
         cell_filter=None,
         mask=None,
         fix_symm=True,
-        fmax=0.00001,
-        steps=10000,
+        fmax=0.000001,
+        steps=5000,
         logfile='ase_relaxer.log',
         constant_volume = False
     ):
@@ -46,8 +46,8 @@ class AseAtomRelax:
         atoms.info['position'] = atoms.get_positions()
         atoms.info['formula'] = atoms.get_chemical_formula(empirical=True)
         atoms.info['symbol'] = atoms.get_chemical_symbols()
-        atoms.info['stress'] = atoms.get_forces(voigt=False)
-        atoms.info['stress_voigt'] = atoms.get_forces()
+        atoms.info['stress'] = atoms.get_stress(voigt=False)
+        atoms.info['stress_voigt'] = atoms.get_stress()
         atoms.info['volume'] = atoms.get_volume()
         atoms.info['a'] = atoms.cell.lengths()[0]
         atoms.info['b'] = atoms.cell.lengths()[1]
@@ -72,6 +72,27 @@ class AseAtomRelax:
             cell_filter = self.cell_filter(atoms, mask=self.mask)
         optimizer = self.optimizer(cell_filter, logfile=self.logfile)
         optimizer.run(fmax=self.fmax, steps=self.steps)
+        opt_steps = optimizer.get_number_of_steps()
+        atoms.info['opt_steps'] = opt_steps
+        opt_fin = True
+        if opt_steps >= self.steps:
+            opt_fin = False
+        atoms.info['opt_conv'] = opt_fin
+        atoms.info['opt'] = 'post'
+        return atoms
+
+    def redo(self, atoms):
+        atoms = atoms.copy()
+        if self.fix_symm:
+            atoms.set_constraint(FixSymmetry(atoms, symprec=1e-05))
+
+        atoms.calc = self.calc
+        if self.constant_volume:
+            cell_filter = self.cell_filter(atoms, constant_volume = self.constant_volume, mask=self.mask)
+        else:
+            cell_filter = self.cell_filter(atoms, mask=self.mask)
+        optimizer = self.optimizer(cell_filter, logfile=self.logfile)
+        optimizer.run(fmax=0.00001, steps=20000)
         opt_steps = optimizer.get_number_of_steps()
         atoms.info['opt_steps'] = opt_steps
         opt_fin = True

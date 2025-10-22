@@ -23,9 +23,11 @@ def overwrite_default(config, argv: list[str] | None=None):
     args = parse_args(argv)
     config['calculator']['calc'] = args.calc.lower()
     config['calculator']['model'] =args.model.lower()
+    config['calculator']['modal'] =args.modal.lower()
 
     config['prefix'] = f'{args.model.lower()}/{args.modal.lower()}'
-    config['calculator']['modal'] = args.modal.lower()
+    config['calculator']['calc_args']['modal'] = args.modal.lower()
+    config['calculator']['calc_args']['device'] = 'cuda' #TODO
 
     return config
 
