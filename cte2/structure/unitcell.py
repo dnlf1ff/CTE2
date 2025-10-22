@@ -43,19 +43,20 @@ def process_unitcell(config, calc):
         if atoms.info['opt_conv']:
             atoms_dct['post'].update(atoms.info.copy())
             spg_num = get_spgnum(atoms)
-            write_csv(csv_file, atoms, idx='post-re')
+            write_csv(csv_file, atoms, idx='post')
+            atoms.calc = None
             atoms_list.append(atoms)
 
         else:
             atoms = ase_relaxer.redo(atoms)
             spg_num = get_spgnum(atoms)
-            atoms_dct['post-re'].update(atoms.info.copy())
-            write_csv(csv_file, atoms, idx='post')
+            atoms_dct['post_re'].update(atoms.info.copy())
+            write_csv(csv_file, atoms, idx='post_re')
             atoms.calc = None
             atoms_list.append(atoms)
             if not atoms.info['opt_conv']:
                 print('WARNING: failed structural relaxation. aborting program')
-                sys.exit()
+                # sys.exit()
         ase_IO.write(f"{save_dir}/CONTCAR", atoms, format='vasp')
 
     else:
@@ -79,6 +80,6 @@ def process_unitcell(config, calc):
         print(f'WARNING: unitcell structure did not converged with in {step} steps!')
 
     csv_file.close()
-    del ase_atom_relaxer, atoms, csv_file
+    del ase_relaxer, atoms, csv_file
     gc.collect()
 
