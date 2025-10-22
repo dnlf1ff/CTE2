@@ -89,7 +89,7 @@ def update_config_dirs(config):
 
 def check_calc_config(config):
     conf = config['calculator']
-    assert os.path.isfile(conf['model_path'])
+    assert os.path.isfile(conf['path'])
 
 def parse_config(config, argv: list[str] | None=None):
     config = overwrite_default(config, argv)
