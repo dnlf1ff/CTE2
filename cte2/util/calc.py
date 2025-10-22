@@ -12,8 +12,8 @@ def get_calc(config):
     calc_args = conf.get('calc_args', {})
 
     print('\n*************************************')
-    print(f'calc type: {conf["calc_type"].upper()}')
-    print(f'calc: {conf["calc"].upper()}')
+    print(f'calc: {conf["family"].upper()}')
+    print(f'model: {conf["model"].upper()}')
     print(f'modal: {calc_args["modal"]}')
     print(f'path: {conf["path"]}')
     print('*************************************\n')
