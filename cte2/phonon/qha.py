@@ -41,6 +41,11 @@ def process_qha(config, calc):
 
     ev_file.close()
     temperatures, cv, entropy, fe_phonon, _, _ = read_thermal_properties_yaml(filenames=filenames)
+    temperatures = np.array(temperatures, dtype=float)
+    cv = np.array(cv, dtype=float)
+    entropy = np.array(entropy, dtype=float)
+    fe_phonon = np.array(fe_phonon, dtype=float)
+
     volumes, free_energies = read_v_e(filename=ev_filename)
 
     qha_kwargs = {'volumes': volumes, 'electronic_energies': free_energies,
