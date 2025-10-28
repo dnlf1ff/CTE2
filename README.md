@@ -1,4 +1,4 @@
-## Discription
+## Description
 
 This is a python package for calculating the coefficient of thermal expansion (CTE) with SevenNet-Omni.
 
@@ -32,4 +32,5 @@ pip install .
 # bash
 cte2-run --calc seven --model omni --modal mp_r2scan
 ```
+
 
