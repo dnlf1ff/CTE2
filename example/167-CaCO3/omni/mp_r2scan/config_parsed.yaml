@@ -1,0 +1,84 @@
+---
+
+data:
+    input: ./POSCAR
+    load_args:
+        format: vasp
+        index: 0
+    cwd: ./cte/167_CaCO3/omni/mp_r2scan
+
+calculator:
+    family: sevennet
+    model: omni
+    path: .
+    calc_args:
+        device: cuda
+        modal: mp_r2scan
+        enable_flash: true
+    modal: mp_r2scan
+
+unitcell:
+    run: true
+    load: false
+    save: ./cte/167_CaCO3/omni/mp_r2scan/./unitcell
+    primitive_matrix: [[0.6666666666666666, -0.3333333333333333, -0.3333333333333333],
+        [0.3333333333333333, 0.3333333333333333, -0.6666666666666666], [0.3333333333333333,
+            0.3333333333333333, 0.3333333333333333]]
+
+deform:
+    save: ./cte/167_CaCO3/omni/mp_r2scan/./deform
+    run: true
+    load: false
+    load_opt: false
+    ratio: [0.95, 0.96, 0.97, 0.98, 0.99, 1.0, 1.01, 1.02, 1.03, 1.04, 1.05]
+
+supercell:
+    save: ./cte/167_CaCO3/omni/mp_r2scan/./supercell
+    run: true
+    symprec: 1.0e-05
+    supercell_matrix: [2, 2, 1]
+    distance: 0.01
+    random_seed: 42
+
+phonon:
+    save: ./cte/167_CaCO3/omni/mp_r2scan/./phonon
+    symm_fc2: true
+    mesh_numbers: [21, 21, 17]
+    load_fc2: false
+    load_thermal: false
+    run_dos: true
+    run_band: true
+    symprec: 1.0e-05
+    t_min: 0
+    t_max: 801
+    t_step: 2
+
+qha:
+    save: ./cte/167_CaCO3/omni/mp_r2scan/./qha
+    t_max: 801
+    thin_number: 50
+    data: ./data
+    plot: ./plot
+    full: ./full
+    eos: birch_murnaghan
+
+opt:
+    unitcell:
+        fmax: 1.0e-06
+        steps: 2500
+        optimizer: fire
+        fix_symm: true
+        cell_filter: frechet
+        mask: [1, 1, 1, 1, 1, 1]
+    deform:
+        fmax: 1.0e-06
+        steps: 3500
+        optimizer: fire
+        fix_symm: true
+        cell_filter: frechet
+        mask: [0, 0, 0, 0, 0, 0]
+
+prefix: omni/mp_r2scan
+
+cwd: ./omni/mp_r2scan
+...
